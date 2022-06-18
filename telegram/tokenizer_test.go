@@ -51,7 +51,7 @@ func TestTokenizerStructure(t *testing.T) {
 			t.Error(err)
 		}
 
-		if !reflect.DeepEqual(test.expected, actual) {
+		if !reflect.DeepEqual(test.expected, actual.tokens) {
 			t.Errorf("expected %+v, got %+v", test.expected, actual)
 		}
 	}

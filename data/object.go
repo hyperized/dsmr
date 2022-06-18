@@ -9,6 +9,8 @@ import (
 	"strings"
 )
 
+const DateTimeFormat = "060102150405"
+
 type Object struct {
 	ObisIdentifier string
 	RawValue       string
@@ -27,19 +29,29 @@ func (object Object) String() string {
 
 const splitLineExpression string = "([0-9]-[0-9]:[0-9]+\\.[0-9]+\\.[0-9]+)(\\(.*\\))"
 const splitLineError string = "could not parse line"
+const identifierError string = "could not find matching OBIS reference"
 
 var (
 	splitLine = regexp.MustCompile(splitLineExpression)
 )
 
 func NewFromLine(line string) (Object, error) {
-	match := splitLine.FindStringSubmatch(strings.TrimSpace(line))
+	var (
+		object   Object
+		splitErr = errors.New(splitLineError)
+		matchErr = errors.New(identifierError)
+		match    = splitLine.FindStringSubmatch(strings.TrimSpace(line))
+	)
 
 	if len(match) != 3 {
-		return Object{}, errors.New(splitLineError)
+		return object, splitErr
 	}
 
 	reference := obis.References[match[1]]
+
+	if reference.Identifier == "" {
+		return object, matchErr
+	}
 
 	return Object{
 		ObisIdentifier: reference.Identifier,
