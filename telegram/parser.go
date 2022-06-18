@@ -75,7 +75,7 @@ func (parser *Parser) Parse() []Telegram {
 		c  = make(chan Telegram)
 	)
 
-	go parser.ParseLines(c)
+	go parser.parseLines(c)
 
 	for t = range c {
 		ts = append(ts, t)
@@ -84,7 +84,7 @@ func (parser *Parser) Parse() []Telegram {
 	return ts
 }
 
-func (parser *Parser) ParseLines(ch chan Telegram) {
+func (parser *Parser) parseLines(ch chan Telegram) {
 	var (
 		telegram    Telegram
 		token       Token
@@ -111,7 +111,7 @@ func (parser *Parser) ParseLines(ch chan Telegram) {
 		}
 
 		// Parse header
-		if header, ok := HeaderFromToken(token); ok {
+		if header, ok := headerFromToken(token); ok {
 			telegram = Telegram{
 				header: header,
 			}
@@ -119,12 +119,12 @@ func (parser *Parser) ParseLines(ch chan Telegram) {
 		}
 
 		// OBIS Data
-		if obis, ok := DataFromToken(token); ok {
+		if obis, ok := dataFromToken(token); ok {
 			telegram.data = append(telegram.data, obis)
 		}
 
 		// Parse footer
-		if footer, ok := FooterFromToken(token); ok {
+		if footer, ok := footerFromToken(token); ok {
 			// do CRC?
 			telegram.footer = footer
 			ch <- telegram
@@ -136,13 +136,13 @@ func (parser *Parser) ParseLines(ch chan Telegram) {
 	close(ch)
 }
 
-func NewFromReader(reader io.Reader) *Parser {
+func New(reader io.Reader) *Parser {
 	return &Parser{
 		scanner: bufio.NewScanner(reader),
 	}
 }
 
-func HeaderFromToken(token Token) (Header, bool) {
+func headerFromToken(token Token) (Header, bool) {
 	var (
 		literals []string
 		h        Header
@@ -167,7 +167,7 @@ func HeaderFromToken(token Token) (Header, bool) {
 	}, true
 }
 
-func DataFromToken(token Token) (data.Object, bool) {
+func dataFromToken(token Token) (data.Object, bool) {
 	var (
 		o   data.Object
 		err error
@@ -181,7 +181,7 @@ func DataFromToken(token Token) (data.Object, bool) {
 	return o, true
 }
 
-func FooterFromToken(token Token) (Footer, bool) {
+func footerFromToken(token Token) (Footer, bool) {
 	var (
 		literal string
 		f       Footer

@@ -17,14 +17,14 @@ func TestNewParserFromReader(t *testing.T) {
 		}
 	}(file)
 
-	parser := NewFromReader(file)
+	parser := New(file)
 	telegrams := parser.Parse()
 	t.Log(telegrams)
 }
 
 func TestHeaderFromToken(t *testing.T) {
 	token, _ := tokenize("/ISk5\\2MT382-1000\n")
-	header, ok := HeaderFromToken(token)
+	header, ok := headerFromToken(token)
 	if !ok {
 		t.Error("no header found in string")
 	}
@@ -33,7 +33,7 @@ func TestHeaderFromToken(t *testing.T) {
 
 func TestDataFromToken(t *testing.T) {
 	token, _ := tokenize("1-0:1.8.1(123456.789*kWh)\n")
-	data, ok := DataFromToken(token)
+	data, ok := dataFromToken(token)
 	if !ok {
 		t.Error("no data found in string")
 	}
@@ -42,7 +42,7 @@ func TestDataFromToken(t *testing.T) {
 
 func TestFooterFromToken(t *testing.T) {
 	token, _ := tokenize("!EF2F")
-	header, ok := FooterFromToken(token)
+	header, ok := footerFromToken(token)
 	if !ok {
 		t.Error("no footer found in token")
 	}

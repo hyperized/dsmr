@@ -18,7 +18,7 @@ func main() {
 		}
 	}(file)
 
-	parser := telegram.NewFromReader(file)
+	parser := telegram.New(file)
 	telegrams := parser.Parse()
 	log.Println(telegrams)
 }
