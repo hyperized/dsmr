@@ -2,23 +2,40 @@ package main
 
 import (
 	"github.com/hyperized/dsmr/telegram"
+	"go.bug.st/serial"
+
 	"log"
-	"os"
 )
 
 func main() {
-	file, err := os.Open("examples/telegram_v5_0_2.txt")
-	if err != nil {
-		log.Fatal(err)
+	// P1
+	mode := &serial.Mode{
+		BaudRate: 115200,
+		DataBits: 8,
+		Parity:   serial.NoParity,
+		StopBits: serial.OneStopBit,
 	}
-	defer func(file *os.File) {
-		err := file.Close()
+
+	// TODO: Automatic port detection based on VID
+	port, err := serial.Open("/dev/ttyUSB0", mode)
+	defer func(port serial.Port) {
+		err := port.Close()
 		if err != nil {
 			log.Fatal(err)
 		}
-	}(file)
+	}(port)
 
-	parser := telegram.New(file)
-	telegrams := parser.Parse()
-	log.Println(telegrams)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	log.Printf("%#v\n", port)
+
+	parser := telegram.New(port)
+
+	log.Printf("%#v\n", parser)
+
+	_ = parser.Parse()
+
+	// TODO: signal handling
 }

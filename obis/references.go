@@ -53,7 +53,7 @@ var References = map[string]Reference{
 	// Electrical
 	"1-0:1.8.1": {
 		// 1-0:1.8.1(123456.789*kWh)
-		Name:        "MeterReadingElectrictyDeliveredToClientTariff1",
+		Name:        "MeterReadingElectricityDeliveredToClientTariff1",
 		Identifier:  "1-0:1.8.1",
 		Description: "Meter Reading electricity delivered to client (Tariff 1) in 0,001 kWh",
 		Unit:        "kWh",
@@ -67,7 +67,7 @@ var References = map[string]Reference{
 	},
 	"1-0:1.8.2": {
 		// 1-0:1.8.2(123456.789*kWh)
-		Name:        "MeterReadingElectrictyDeliveredToClientTariff2",
+		Name:        "MeterReadingElectricityDeliveredToClientTariff2",
 		Identifier:  "1-0:1.8.1",
 		Description: "Meter Reading electricity delivered to client (Tariff 2) in 0,001 kWh",
 		Unit:        "kWh",
@@ -81,7 +81,7 @@ var References = map[string]Reference{
 	},
 	"1-0:2.8.1": {
 		// 1-0:2.8.1(123456.789*kWh)
-		Name:        "MeterReadingElectrictyDeliveredByClientTariff1",
+		Name:        "MeterReadingElectricityDeliveredByClientTariff1",
 		Identifier:  "1-0:2.8.1",
 		Description: "Meter Reading electricity delivered by client (low tariff) in 0,001 kWh",
 		Unit:        "kWh",
@@ -95,7 +95,7 @@ var References = map[string]Reference{
 	},
 	"1-0:2.8.2": {
 		// 1-0:2.8.2(123456.789*kWh)
-		Name:        "MeterReadingElectrictyDeliveredByClientTariff2",
+		Name:        "MeterReadingElectricityDeliveredByClientTariff2",
 		Identifier:  "1-0:2.8.2",
 		Description: "Meter Reading electricity delivered by client (Tariff 2) in 0,001 kWh",
 		Unit:        "kWh",

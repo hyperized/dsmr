@@ -12,6 +12,7 @@ import (
 const DateTimeFormat = "060102150405"
 
 type Object struct {
+	Name           string
 	ObisIdentifier string
 	RawValue       string
 	Description    string
@@ -24,7 +25,7 @@ func (object Object) Value() string {
 }
 
 func (object Object) String() string {
-	return fmt.Sprintf("Object [%#v]", object)
+	return fmt.Sprintf(object.Name + ": " + object.RawValue)
 }
 
 const splitLineExpression string = "([0-9]-[0-9]:[0-9]+\\.[0-9]+\\.[0-9]+)(\\(.*\\))"
@@ -54,6 +55,7 @@ func NewFromLine(line string) (Object, error) {
 	}
 
 	return Object{
+		Name:           reference.Name,
 		ObisIdentifier: reference.Identifier,
 		RawValue:       match[2],
 		Description:    reference.Description,

@@ -15,7 +15,7 @@ type (
 	}
 	Telegram struct {
 		header Header
-		data   []data.Object
+		data   map[string]data.Object
 		footer Footer
 	}
 	Footer struct {
@@ -78,6 +78,10 @@ func (parser *Parser) Parse() []Telegram {
 	go parser.parseLines(c)
 
 	for t = range c {
+		// TODO: Go routines to process provided telegrams
+		// TODO: Prometheus metrics
+		log.Println(t.data["TariffIndicatorElectricity"].String())
+		log.Println(t.data["ActualElectricityPowerDelivered"].String())
 		ts = append(ts, t)
 	}
 
@@ -114,13 +118,14 @@ func (parser *Parser) parseLines(ch chan Telegram) {
 		if header, ok := headerFromToken(token); ok {
 			telegram = Telegram{
 				header: header,
+				data:   make(map[string]data.Object),
 			}
 			continue
 		}
 
 		// OBIS Data
 		if obis, ok := dataFromToken(token); ok {
-			telegram.data = append(telegram.data, obis)
+			telegram.data[obis.Name] = obis
 		}
 
 		// Parse footer
@@ -136,7 +141,7 @@ func (parser *Parser) parseLines(ch chan Telegram) {
 	close(ch)
 }
 
-func New(reader io.Reader) *Parser {
+func New(reader io.ReadWriteCloser) *Parser {
 	return &Parser{
 		scanner: bufio.NewScanner(reader),
 	}
