@@ -78,14 +78,24 @@ func (parser *Parser) Parse() []Telegram {
 	go parser.parseLines(c)
 
 	for t = range c {
-		// TODO: Go routines to process provided telegrams
-		// TODO: Prometheus metrics
-		log.Println(t.data["TariffIndicatorElectricity"].String())
-		log.Println(t.data["ActualElectricityPowerDelivered"].String())
 		ts = append(ts, t)
 	}
 
 	return ts
+}
+
+func (parser *Parser) ParseStream() {
+	var (
+		t Telegram
+		c = make(chan Telegram)
+	)
+
+	go parser.parseLines(c)
+
+	for t = range c {
+		// TODO: Go routines to process provided telegrams
+		go telegramToPrometheus(t)
+	}
 }
 
 func (parser *Parser) parseLines(ch chan Telegram) {

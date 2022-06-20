@@ -20,15 +20,24 @@ type Object struct {
 	Unit           string
 }
 
-func (object Object) Value() string {
-	return object.RawValue
+func (object Object) Value() []string {
+	var r []string
+	values := strings.Split(object.RawValue, ")(")
+	for _, v := range values {
+		// Strip units out of it, we already know
+		p := strings.Split(v, "*")
+		r = append(r, p[0])
+
+		// TODO: Parse timestamp
+	}
+	return r
 }
 
 func (object Object) String() string {
 	return fmt.Sprintf(object.Name + ": " + object.RawValue)
 }
 
-const splitLineExpression string = "([0-9]-[0-9]:[0-9]+\\.[0-9]+\\.[0-9]+)(\\(.*\\))"
+const splitLineExpression string = "([0-9]-[0-9]:[0-9]+[\\.:][0-9]+\\.[0-9]+)\\((.*)\\)"
 const splitLineError string = "could not parse line"
 const identifierError string = "could not find matching OBIS reference"
 
@@ -53,6 +62,8 @@ func NewFromLine(line string) (Object, error) {
 	if reference.Identifier == "" {
 		return object, matchErr
 	}
+
+	// TODO parse actual values out of RawValue
 
 	return Object{
 		Name:           reference.Name,

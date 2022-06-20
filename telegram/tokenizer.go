@@ -17,7 +17,6 @@ const (
 	Exclamation             // !
 	Newline                 // Every newline
 	Literal                 // Any other set of non-whitespace characters
-	Nothing                 // '', like literally nothing. Maybe even uint8
 
 	SlashToken            = "/"
 	BackslashToken        = "\\"
@@ -29,7 +28,6 @@ const (
 	DotToken              = "."
 	ExclamationToken      = "!"
 	NewlineToken          = '\n'
-	NothingToken
 )
 
 type (
@@ -42,6 +40,8 @@ type (
 		kind  int
 	}
 )
+
+// TODO: Fix: could not tokenize line: could not identify character '' of type 'uint8'
 
 func tokenize(input string) (Token, error) {
 	var ts []token
@@ -77,9 +77,6 @@ func tokenize(input string) (Token, error) {
 			counter++
 		case rune(input[counter]) == NewlineToken:
 			ts = append(ts, token{string(NewlineToken), Newline})
-			counter++
-		case rune(input[counter]) == NothingToken:
-			ts = append(ts, token{string(NothingToken), Nothing})
 			counter++
 		case isLiteral(rune(input[counter])):
 			initial := counter
