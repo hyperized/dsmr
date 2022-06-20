@@ -110,8 +110,8 @@ func (parser *Parser) parseLines(ch chan Telegram) {
 		token, tokenizeErr, eof = parser.line()
 
 		if tokenizeErr != nil {
-			log.Println("could not tokenize line: " + tokenizeErr.Error())
-			break // Cannot parse the line
+			log.Println(tokenizeErr.Error())
+			continue // Cannot parse the line
 		}
 
 		if eof {

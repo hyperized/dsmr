@@ -13,33 +13,23 @@ const DateTimeFormat = "060102150405"
 
 type Object struct {
 	Name           string
+	Metric         obis.Metric
 	ObisIdentifier string
 	RawValue       string
+	Value          []string
 	Description    string
-	Data           cosem.Format
+	Format         cosem.Format
 	Unit           string
 }
 
-func (object Object) Value() []string {
-	var r []string
-	values := strings.Split(object.RawValue, ")(")
-	for _, v := range values {
-		// Strip units out of it, we already know
-		p := strings.Split(v, "*")
-		r = append(r, p[0])
-
-		// TODO: Parse timestamp
-	}
-	return r
-}
-
 func (object Object) String() string {
-	return fmt.Sprintf(object.Name + ": " + object.RawValue)
+	return fmt.Sprintf(object.Name + ": " + object.Value[0] + object.Unit)
 }
 
 const splitLineExpression string = "([0-9]-[0-9]:[0-9]+[\\.:][0-9]+\\.[0-9]+)\\((.*)\\)"
-const splitLineError string = "could not parse line"
-const identifierError string = "could not find matching OBIS reference"
+const splitLineError string = "object: could not parse line"
+const identifierError string = "object: could not find matching OBIS reference"
+const nullError string = "object: no value could be parsed from this line"
 
 var (
 	splitLine = regexp.MustCompile(splitLineExpression)
@@ -50,6 +40,7 @@ func NewFromLine(line string) (Object, error) {
 		object   Object
 		splitErr = errors.New(splitLineError)
 		matchErr = errors.New(identifierError)
+		nullErr  = errors.New(nullError)
 		match    = splitLine.FindStringSubmatch(strings.TrimSpace(line))
 	)
 
@@ -63,14 +54,32 @@ func NewFromLine(line string) (Object, error) {
 		return object, matchErr
 	}
 
-	// TODO parse actual values out of RawValue
+	value := getValue(match[2])
+	if value[0] == "" {
+		return object, nullErr
+	}
 
 	return Object{
 		Name:           reference.Name,
+		Metric:         reference.Metric,
 		ObisIdentifier: reference.Identifier,
 		RawValue:       match[2],
+		Value:          value,
 		Description:    reference.Description,
-		Data:           reference.Format,
+		Format:         reference.Format,
 		Unit:           reference.Unit,
 	}, nil
+}
+
+func getValue(raw string) []string {
+	var r []string
+	values := strings.Split(raw, ")(")
+	for _, v := range values {
+		// Strip units out of it, we already know
+		p := strings.Split(v, "*")
+		r = append(r, p[0])
+
+		// TODO: Parse timestamp
+	}
+	return r
 }

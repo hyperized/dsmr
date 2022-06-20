@@ -85,7 +85,7 @@ func tokenize(input string) (Token, error) {
 			}
 			ts = append(ts, token{input[initial:counter], Literal})
 		default:
-			return Token{}, fmt.Errorf("could not identify character '%c' of type '%T'", input[counter], input[counter])
+			return Token{}, fmt.Errorf("tokenizer: could not identify character '%c' of type '%T'", input[counter], input[counter])
 		}
 	}
 

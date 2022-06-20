@@ -8,11 +8,16 @@ import (
 
 type Reference struct {
 	Name        string
+	Metric      Metric
 	Identifier  string
 	Description string
 	Unit        string
 	Format      cosem.Format
 	Parser      interface{}
+}
+
+type Metric struct {
+	Name string
 }
 
 var References = map[string]Reference{
@@ -53,7 +58,10 @@ var References = map[string]Reference{
 	// Electrical
 	"1-0:1.8.1": {
 		// 1-0:1.8.1(123456.789*kWh)
-		Name:        "MeterReadingElectricityDeliveredToClientTariff1",
+		Name: "MeterReadingElectricityDeliveredToClientTariff1",
+		Metric: Metric{
+			Name: "electricity_delivered_to_client_tariff1_kwh",
+		},
 		Identifier:  "1-0:1.8.1",
 		Description: "Meter Reading electricity delivered to client (Tariff 1) in 0,001 kWh",
 		Unit:        "kWh",
@@ -67,7 +75,10 @@ var References = map[string]Reference{
 	},
 	"1-0:1.8.2": {
 		// 1-0:1.8.2(123456.789*kWh)
-		Name:        "MeterReadingElectricityDeliveredToClientTariff2",
+		Name: "MeterReadingElectricityDeliveredToClientTariff2",
+		Metric: Metric{
+			Name: "electricity_delivered_to_client_tariff2_kwh",
+		},
 		Identifier:  "1-0:1.8.1",
 		Description: "Meter Reading electricity delivered to client (Tariff 2) in 0,001 kWh",
 		Unit:        "kWh",
@@ -81,7 +92,10 @@ var References = map[string]Reference{
 	},
 	"1-0:2.8.1": {
 		// 1-0:2.8.1(123456.789*kWh)
-		Name:        "MeterReadingElectricityDeliveredByClientTariff1",
+		Name: "MeterReadingElectricityDeliveredByClientTariff1",
+		Metric: Metric{
+			Name: "electricity_delivered_by_client_tariff1_kwh",
+		},
 		Identifier:  "1-0:2.8.1",
 		Description: "Meter Reading electricity delivered by client (low tariff) in 0,001 kWh",
 		Unit:        "kWh",
@@ -95,9 +109,12 @@ var References = map[string]Reference{
 	},
 	"1-0:2.8.2": {
 		// 1-0:2.8.2(123456.789*kWh)
-		Name:        "MeterReadingElectricityDeliveredByClientTariff2",
+		Name: "MeterReadingElectricityDeliveredByClientTariff2",
+		Metric: Metric{
+			Name: "electricity_delivered_by_client_tariff2_kwh",
+		},
 		Identifier:  "1-0:2.8.2",
-		Description: "Meter Reading electricity delivered by client (Tariff 2) in 0,001 kWh",
+		Description: "Meter Reading electricity delivered by client (high 2) in 0,001 kWh",
 		Unit:        "kWh",
 		Format: cosem.Format{
 			Type:            decimal.Decimal{},
@@ -109,7 +126,10 @@ var References = map[string]Reference{
 	},
 	"0-0:96.14.0": {
 		// 0-0:96.14.0(0002)
-		Name:        "TariffIndicatorElectricity",
+		Name: "TariffIndicatorElectricity",
+		Metric: Metric{
+			Name: "electricity_tariff",
+		},
 		Identifier:  "0-0:96.14.0",
 		Description: "Tariff indicator electricity.",
 		Format: cosem.Format{
@@ -120,7 +140,10 @@ var References = map[string]Reference{
 	},
 	"1-0:1.7.0": {
 		// 1-0:1.7.0(01.193*kW)
-		Name:        "ActualElectricityPowerDelivered",
+		Name: "ActualElectricityPowerDelivered",
+		Metric: Metric{
+			Name: "actual_electricity_power_delivered_kw",
+		},
 		Identifier:  "1-0:1.7.0.255",
 		Description: "Actual electricity power delivered (+P) in 1 Watt resolution",
 		Unit:        "kW",
@@ -134,7 +157,10 @@ var References = map[string]Reference{
 	},
 	"1-0:2.7.0": {
 		// 1-0:2.7.0(00.000*kW)
-		Name:        "ActualElectricityPowerReceived",
+		Name: "ActualElectricityPowerReceived",
+		Metric: Metric{
+			Name: "actual_electricity_power_received_kw",
+		},
 		Identifier:  "1-0:2.7.0.255",
 		Description: "Actual electricity power received (-P) in 1 Watt resolution",
 		Unit:        "kW",
@@ -146,10 +172,12 @@ var References = map[string]Reference{
 			Length:          5,
 		},
 	},
-
 	"0-0:96.7.21": {
 		// 0-0:96.7.21(00004)
-		Name:        "NumbersOfPowerFailuresInAnyPhase",
+		Name: "NumberOfPowerFailuresInAnyPhase",
+		Metric: Metric{
+			Name: "power_failures_in_any_phase",
+		},
 		Identifier:  "0-0:96.7.21",
 		Description: "Number of power failures in any phase",
 		Format: cosem.Format{
@@ -160,10 +188,12 @@ var References = map[string]Reference{
 			Length:          5,
 		},
 	},
-
 	"0-0:96.7.9": {
 		// 0-0:96.7.9(00002)
-		Name:        "NumberOfLongPowerFailuresInAnyPhase",
+		Name: "NumberOfLongPowerFailuresInAnyPhase",
+		Metric: Metric{
+			Name: "long_power_failures_in_any_phase",
+		},
 		Identifier:  "0-0:96.7.9",
 		Description: "Number of long power failures in any phase",
 		Format: cosem.Format{
@@ -174,10 +204,13 @@ var References = map[string]Reference{
 			Length:          5,
 		},
 	},
-	// Skipping 1-0:99.97.0.255 power failure event log for now.
+	// "1-0:99.97.0.255": {}, Skipping power failure event log for now.
 	"1-0:32.32.0": {
 		// 1-0:32.32.0(00002)
-		Name:        "NumberOfVoltageSagsInPhaseL1",
+		Name: "NumberOfVoltageSagsInPhaseL1",
+		Metric: Metric{
+			Name: "voltage_sags_phase_l1",
+		},
 		Identifier:  "1-0:32.32.0",
 		Description: "Number of voltage sags in Phase L1",
 		Format: cosem.Format{
@@ -190,7 +223,10 @@ var References = map[string]Reference{
 	},
 	"1-0:52.32.0": {
 		// 1-0:52.32.0(00001)
-		Name:        "NumberOfVoltageSagsInPhaseL2",
+		Name: "NumberOfVoltageSagsInPhaseL2",
+		Metric: Metric{
+			Name: "voltage_sags_phase_l2",
+		},
 		Identifier:  "1-0:52.32.0",
 		Description: "Number of voltage sags in Phase L2",
 		Format: cosem.Format{
@@ -203,7 +239,10 @@ var References = map[string]Reference{
 	},
 	"1-0:72.32.0": {
 		// 1-0:72.32.0(00000)
-		Name:        "NumberOfVoltageSagsInPhaseL3",
+		Name: "NumberOfVoltageSagsInPhaseL3",
+		Metric: Metric{
+			Name: "voltage_sags_phase_l3",
+		},
 		Identifier:  "1-0:72.32.0",
 		Description: "Number of voltage sags in Phase L3",
 		Format: cosem.Format{
@@ -216,7 +255,10 @@ var References = map[string]Reference{
 	},
 	"1-0:32.36.0": {
 		// 1-0:32.36.0(00000)
-		Name:        "NumberOfVoltageSwellsInPhaseL1",
+		Name: "NumberOfVoltageSwellsInPhaseL1",
+		Metric: Metric{
+			Name: "voltage_swells_phase_l1",
+		},
 		Identifier:  "1-0:32.36.0",
 		Description: "Number of voltage swells in phase L1",
 		Format: cosem.Format{
@@ -229,7 +271,10 @@ var References = map[string]Reference{
 	},
 	"1-0:52.36.0": {
 		// 1-0:52.36.0(00003)
-		Name:        "NumberOfVoltageSwellsInPhaseL2",
+		Name: "NumberOfVoltageSwellsInPhaseL2",
+		Metric: Metric{
+			Name: "voltage_swells_phase_l2",
+		},
 		Identifier:  "1-0:52.36.0",
 		Description: "Number of voltage swells in phase L2",
 		Format: cosem.Format{
@@ -242,7 +287,10 @@ var References = map[string]Reference{
 	},
 	"1-0:72.36.0": {
 		// 1-0:72.36.0(00000)
-		Name:        "NumberOfVoltageSwellsInPhaseL3",
+		Name: "NumberOfVoltageSwellsInPhaseL3",
+		Metric: Metric{
+			Name: "voltage_swells_phase_l3",
+		},
 		Identifier:  "1-0:72.36.0",
 		Description: "Number of voltage swells in phase L3",
 		Format: cosem.Format{
@@ -252,5 +300,108 @@ var References = map[string]Reference{
 			MaximumDecimals: 0,
 			Length:          5,
 		},
+	},
+	// "0-0:96.13.0": {}, Skip for now
+	"1-0:32.7.0": {
+		// 1-0:32.7.0(220.1*V)
+		Name: "InstantVoltageL1",
+		Metric: Metric{
+			Name: "instant_voltage_l1",
+		},
+		Identifier:  "1-0:32.7.0",
+		Description: "Instantaneous voltage L1 in V resolution",
+		Format: cosem.Format{
+			Type:            decimal.Decimal{},
+			Tag:             cosem.LongUnsigned,
+			MinimumDecimals: 1,
+			MaximumDecimals: 1,
+			Length:          4,
+		},
+		Unit: "V",
+	},
+	"1-0:52.7.0": {
+		// 1-0:52.7.0(220.2*V)
+		Name: "InstantVoltageL2",
+		Metric: Metric{
+			Name: "instant_voltage_l2",
+		},
+		Identifier:  "1-0:52.7.0",
+		Description: "Instantaneous voltage L2 in V resolution",
+		Format: cosem.Format{
+			Type:            decimal.Decimal{},
+			Tag:             cosem.LongUnsigned,
+			MinimumDecimals: 1,
+			MaximumDecimals: 1,
+			Length:          4,
+		},
+		Unit: "V",
+	},
+	"1-0:72.7.0": {
+		// 1-0:72.7.0(220.3*V)
+		Name: "InstantVoltageL3",
+		Metric: Metric{
+			Name: "instant_voltage_l3",
+		},
+		Identifier:  "1-0:72.7.0",
+		Description: "Instantaneous voltage L3 in V resolution",
+		Format: cosem.Format{
+			Type:            decimal.Decimal{},
+			Tag:             cosem.LongUnsigned,
+			MinimumDecimals: 1,
+			MaximumDecimals: 1,
+			Length:          4,
+		},
+		Unit: "V",
+	},
+	"1-0:31.7.0": {
+		// 1-0:31.7.0(001*A)
+		Name: "InstantCurrentL1",
+		Metric: Metric{
+			Name: "instant_current_l1",
+		},
+		Identifier:  "1-0:31.7.0",
+		Description: "Instantaneous current L1 in A resolution",
+		Format: cosem.Format{
+			Type:            decimal.Decimal{},
+			Tag:             cosem.LongUnsigned,
+			MinimumDecimals: 0,
+			MaximumDecimals: 0,
+			Length:          3,
+		},
+		Unit: "A",
+	},
+	"1-0:51.7.0": {
+		// 1-0:51.7.0(002*A)
+		Name: "InstantCurrentL2",
+		Metric: Metric{
+			Name: "instant_current_l2",
+		},
+		Identifier:  "1-0:51.7.0",
+		Description: "Instantaneous current L2 in A resolution",
+		Format: cosem.Format{
+			Type:            decimal.Decimal{},
+			Tag:             cosem.LongUnsigned,
+			MinimumDecimals: 0,
+			MaximumDecimals: 0,
+			Length:          3,
+		},
+		Unit: "A",
+	},
+	"1-0:71.7.0": {
+		// 1-0:71.7.0(003*A)
+		Name: "InstantCurrentL3",
+		Metric: Metric{
+			Name: "instant_current_l3",
+		},
+		Identifier:  "1-0:71.7.0",
+		Description: "Instantaneous current L3 in A resolution",
+		Format: cosem.Format{
+			Type:            decimal.Decimal{},
+			Tag:             cosem.LongUnsigned,
+			MinimumDecimals: 0,
+			MaximumDecimals: 0,
+			Length:          3,
+		},
+		Unit: "A",
 	},
 }

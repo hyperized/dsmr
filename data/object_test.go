@@ -31,7 +31,7 @@ func TestNewFromLine(t *testing.T) {
 			if object.RawValue == "" {
 				t.Error("could not parse value")
 			}
-			t.Log(object.Value())
+			t.Log(object.Value[0])
 		})
 	}
 }

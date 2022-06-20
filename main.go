@@ -48,6 +48,7 @@ func main() {
 
 	log.Printf("%#v\n", port)
 
+	telegram.RegisterGauges()
 	parser := telegram.New(port)
 
 	log.Printf("%#v\n", parser)
