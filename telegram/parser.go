@@ -11,7 +11,6 @@ import (
 type (
 	Parser struct {
 		scanner *bufio.Scanner
-		tokens  []token
 	}
 	Telegram struct {
 		header Header
@@ -36,7 +35,7 @@ func (telegram Telegram) String() string {
 		output = append(output, d.String())
 	}
 
-	return strings.Join(output, "\n")
+	return strings.Join(output, "\n") + "\n"
 }
 
 func (header *Header) String() string {

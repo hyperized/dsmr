@@ -31,17 +31,13 @@ const splitLineError string = "object: could not parse line"
 const identifierError string = "object: could not find matching OBIS reference"
 const nullError string = "object: no value could be parsed from this line"
 
-var (
-	splitLine = regexp.MustCompile(splitLineExpression)
-)
-
 func NewFromLine(line string) (Object, error) {
 	var (
 		object   Object
 		splitErr = errors.New(splitLineError)
 		matchErr = errors.New(identifierError)
 		nullErr  = errors.New(nullError)
-		match    = splitLine.FindStringSubmatch(strings.TrimSpace(line))
+		match    = regexp.MustCompile(splitLineExpression).FindStringSubmatch(strings.TrimSpace(line))
 	)
 
 	if len(match) != 3 {
@@ -80,6 +76,7 @@ func getValue(raw string) []string {
 		r = append(r, p[0])
 
 		// TODO: Parse timestamp
+		// TODO: Parse values against cosem format
 	}
 	return r
 }

@@ -18,8 +18,8 @@ func TestNewParserFromReader(t *testing.T) {
 	}(file)
 
 	parser := New(file)
-	_ = parser.Parse()
-	//t.Log(telegrams)
+	telegrams := parser.Parse()
+	t.Log(telegrams)
 }
 
 func TestHeaderFromToken(t *testing.T) {

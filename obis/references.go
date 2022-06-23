@@ -24,9 +24,12 @@ var References = map[string]Reference{
 	// Generic
 	"1-3:0.2.8": {
 		// 1-3:0.2.8(50)
-		Name:        "VersionInformationForP1",
+		Name: "DSMRVersion",
+		Metric: Metric{
+			Name: "dsmr_version",
+		},
 		Identifier:  "1-3:0.2.8",
-		Description: "Version information for P1 output",
+		Description: "DSMR version information for P1 output",
 		Format: cosem.Format{
 			Type:   []byte{},
 			Tag:    cosem.OctetString,
@@ -42,10 +45,12 @@ var References = map[string]Reference{
 			Type: time.Time{},
 		},
 	},
-
 	"0-0:96.1.1": {
 		// 0-0:96.1.1(4B384547303034303436333935353037)
-		Name:        "EquipmentIdentifierElectricity",
+		Name: "EquipmentIdentifierElectricity",
+		Metric: Metric{
+			Name: "electricity_equipment_identifier",
+		},
 		Identifier:  "0-0:96.1.1",
 		Description: "Equipment identifier (Electricity)",
 		Format: cosem.Format{
@@ -54,7 +59,6 @@ var References = map[string]Reference{
 			Length: 96,
 		},
 	},
-
 	// Electrical
 	"1-0:1.8.1": {
 		// 1-0:1.8.1(123456.789*kWh)
@@ -404,4 +408,116 @@ var References = map[string]Reference{
 		},
 		Unit: "A",
 	},
+	"1-0:21.7.0": {
+		// 1-0:21.7.0(01.111*kW)
+		Name: "InstantActivePowerDeliveredL1",
+		Metric: Metric{
+			Name: "instant_active_power_delivered_l1",
+		},
+		Identifier:  "1-0:21.7.0",
+		Description: "Instantaneous active power L1 (+P) in W resolution",
+		Format: cosem.Format{
+			Type:            decimal.Decimal{},
+			Tag:             cosem.LongUnsigned,
+			MinimumDecimals: 3,
+			MaximumDecimals: 3,
+			Length:          5,
+		},
+		Unit: "kW",
+	},
+	"1-0:41.7.0": {
+		// 1-0:41.7.0(02.222*kW)
+		Name: "InstantActivePowerDeliveredL2",
+		Metric: Metric{
+			Name: "instant_active_power_delivered_l2",
+		},
+		Identifier:  "1-0:41.7.0",
+		Description: "Instantaneous active power L2 (+P) in W resolution",
+		Format: cosem.Format{
+			Type:            decimal.Decimal{},
+			Tag:             cosem.LongUnsigned,
+			MinimumDecimals: 3,
+			MaximumDecimals: 3,
+			Length:          5,
+		},
+		Unit: "kW",
+	},
+	"1-0:61.7.0": {
+		// 1-0:61.7.0(03.333*kW)
+		Name: "InstantActivePowerDeliveredL3",
+		Metric: Metric{
+			Name: "instant_active_power_delivered_l3",
+		},
+		Identifier:  "1-0:61.7.0",
+		Description: "Instantaneous active power L3 (+P) in W resolution",
+		Format: cosem.Format{
+			Type:            decimal.Decimal{},
+			Tag:             cosem.LongUnsigned,
+			MinimumDecimals: 3,
+			MaximumDecimals: 3,
+			Length:          5,
+		},
+		Unit: "kW",
+	},
+	"1-0:22.7.0": {
+		// 1-0:22.7.0(04.444*kW)
+		Name: "InstantCurrentReceivedL1",
+		Metric: Metric{
+			Name: "instant_active_power_received_l1",
+		},
+		Identifier:  "1-0:22.7.0",
+		Description: "Instantaneous active power L1 (-P) in W resolution",
+		Format: cosem.Format{
+			Type:            decimal.Decimal{},
+			Tag:             cosem.LongUnsigned,
+			MinimumDecimals: 0,
+			MaximumDecimals: 0,
+			Length:          3,
+		},
+		Unit: "A",
+	},
+	"1-0:42.7.0": {
+		// 1-0:42.7.0(05.555*kW)
+		Name: "InstantCurrentReceivedL2",
+		Metric: Metric{
+			Name: "instant_active_power_received_l2",
+		},
+		Identifier:  "1-0:42.7.0",
+		Description: "Instantaneous active power L2 (-P) in W resolution",
+		Format: cosem.Format{
+			Type:            decimal.Decimal{},
+			Tag:             cosem.LongUnsigned,
+			MinimumDecimals: 0,
+			MaximumDecimals: 0,
+			Length:          3,
+		},
+		Unit: "A",
+	},
+	"1-0:62.7.0": {
+		// 1-0:62.7.0(06.666*kW)
+		Name: "InstantCurrentReceivedL3",
+		Metric: Metric{
+			Name: "instant_active_power_received_l3",
+		},
+		Identifier:  "1-0:62.7.0",
+		Description: "Instantaneous active power L3 (-P) in W resolution",
+		Format: cosem.Format{
+			Type:            decimal.Decimal{},
+			Tag:             cosem.LongUnsigned,
+			MinimumDecimals: 0,
+			MaximumDecimals: 0,
+			Length:          3,
+		},
+		Unit: "A",
+	},
+
+	// Text messages
+
+	// Gas data
+
+	// Thermal data
+
+	// Water data
+
+	// M-Bus data
 }
