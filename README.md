@@ -1,4 +1,6 @@
 # dsmr
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fhyperized%2Fdsmr.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2Fhyperized%2Fdsmr?ref=badge_shield)
+
 
 An idiomatic DSMR Telegram parser in Go.
 
@@ -12,3 +14,7 @@ An idiomatic DSMR Telegram parser in Go.
 
 
 
+
+
+## License
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fhyperized%2Fdsmr.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2Fhyperized%2Fdsmr?ref=badge_large)
