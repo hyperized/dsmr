@@ -6,8 +6,21 @@ Connects to the P1 serial port on a Dutch smart meter, parses each telegram, and
 
 ## Requirements
 
-- Go 1.24+
+- Go 1.26+
 - A P1 USB cable connected to your smart meter's P1 port
+
+## Development
+
+```sh
+make build            # compile
+make test             # unit tests
+make test-integration # integration tests (reads examples/ fixtures)
+make test-coverage    # unit tests with coverage report
+make lint             # golangci-lint
+make clean            # remove coverage artifacts
+```
+
+CI runs lint, unit tests, and integration tests automatically on every push and pull request to `main`. Dependabot keeps Go modules and GitHub Actions up to date.
 
 ## Build
 
