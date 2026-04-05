@@ -16,44 +16,37 @@ linters:
     - nilerr
     - unparam
     - goconst
+  settings:
+    exhaustive:
+      default-signifies-exhaustive: true
+    godot:
+      scope: declarations
+      period: true
+    revive:
+      rules:
+        - name: exported
+          disabled: true
+        - name: package-comments
+          disabled: true
+        - name: var-naming
+          severity: warning
+        - name: context-as-argument
+          severity: warning
+        - name: redefines-builtin-id
+          severity: error
+    goconst:
+      min-occurrences: 4
+    unparam:
+      check-exported: false
+  exclusions:
+    rules:
+      - path: "_test\\.go"
+        linters:
+          - errcheck
+          - unparam
+          - goconst
 
 formatters:
   enable:
     - gofmt
     - goimports
-
-linters-settings:
-  exhaustive:
-    default-signifies-exhaustive: true
-  godot:
-    scope: declarations
-    period: true
-  revive:
-    rules:
-      - name: exported
-        disabled: true
-      - name: package-comments
-        disabled: true
-      - name: var-naming
-        severity: warning
-      - name: context-as-argument
-        severity: warning
-      - name: redefines-builtin-id
-        severity: error
-  goconst:
-    min-occurrences: 4
-  unparam:
-    check-exported: false
-
-issues:
-  exclude-rules:
-    - path: "_test\\.go"
-      linters:
-        - errcheck
-        - unparam
-        - goconst
-    - path: "_integration_test\\.go"
-      linters:
-        - errcheck
-        - unparam
-        - goconst
