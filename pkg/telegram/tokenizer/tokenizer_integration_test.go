@@ -12,7 +12,7 @@ import (
 )
 
 func TestTokenizerFromFile(t *testing.T) {
-	contents, err := os.ReadFile("../../examples/telegram_v5_0_2.txt")
+	contents, err := os.ReadFile("../../../examples/telegram_v5_0_2.txt")
 	require.NoError(t, err)
 	tok, err := tokenizer.New(string(contents))
 	require.NoError(t, err)
