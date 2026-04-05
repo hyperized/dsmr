@@ -38,6 +38,7 @@ func TestMBusChannelsAllRegistered(t *testing.T) {
 			"0-" + string(rune('0'+ch)) + ":24.1.0",
 			"0-" + string(rune('0'+ch)) + ":96.1.0",
 			"0-" + string(rune('0'+ch)) + ":24.2.1",
+			"0-" + string(rune('0'+ch)) + ":24.4.0",
 		}
 		for _, code := range codes {
 			t.Run(code, func(t *testing.T) {

@@ -131,7 +131,9 @@ func TestParseCRCMismatchDropsTelegram(t *testing.T) {
 // updateMetrics using a telegram that covers every branch of updateMetrics:
 //   - "1-3:0.2.8"          DSMRInfo GaugeVec branch
 //   - "0-0:96.1.1"         EquipInfo GaugeVec branch
-//   - "0-1:24.2.1"         MBus GaugeVec branch
+//   - "0-1:24.1.0"         device-type lookup for MBus label
+//   - "0-1:24.2.1"         MBus GaugeVec branch (channel + device_type labels)
+//   - "0-1:24.4.0"         MBusValve GaugeVec branch
 //   - "1-0:1.8.1"          default branch, FloatingPoint gauge (toFloat64 float path)
 //   - "0-0:96.14.0"        default branch, string gauge   (toFloat64 string path)
 //   - "0-0:1.0.0"          default branch, no metric name → continue
@@ -142,7 +144,9 @@ func TestParseStreamWithMetrics(_ *testing.T) {
 		le +
 		"1-3:0.2.8(50)" + le +
 		"0-0:96.1.1(4B384547303034303436333935353037)" + le +
+		"0-1:24.1.0(003)" + le +
 		"0-1:24.2.1(101209112500W)(12785.123*m3)" + le +
+		"0-1:24.4.0(1)" + le +
 		"1-0:1.8.1(123456.789*kWh)" + le +
 		"0-0:96.14.0(0002)" + le +
 		"0-0:1.0.0(101209113020W)" + le +

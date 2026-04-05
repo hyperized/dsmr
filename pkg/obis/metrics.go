@@ -12,6 +12,7 @@ type GaugesMap map[string]prometheus.Gauge
 type Metrics struct {
 	gauges    GaugesMap
 	mbus      *prometheus.GaugeVec
+	mbusValve *prometheus.GaugeVec
 	dsmrInfo  *prometheus.GaugeVec
 	equipInfo *prometheus.GaugeVec
 }
@@ -19,8 +20,11 @@ type Metrics struct {
 // Gauges returns the per-OBIS scalar gauge map.
 func (m *Metrics) Gauges() GaugesMap { return m.gauges }
 
-// MBus returns the GaugeVec for M-Bus channel metered values.
+// MBus returns the GaugeVec for M-Bus channel metered values (labels: channel, device_type).
 func (m *Metrics) MBus() *prometheus.GaugeVec { return m.mbus }
+
+// MBusValve returns the GaugeVec for M-Bus valve/switch state (label: channel).
+func (m *Metrics) MBusValve() *prometheus.GaugeVec { return m.mbusValve }
 
 // DSMRInfo returns the GaugeVec for DSMR version information labels.
 func (m *Metrics) DSMRInfo() *prometheus.GaugeVec { return m.dsmrInfo }
@@ -43,6 +47,11 @@ func Register() *Metrics {
 	mbus := promauto.NewGaugeVec(prometheus.GaugeOpts{
 		Name: "mbus_last_value",
 		Help: "M-Bus last 5-minute metered value",
+	}, []string{"channel", "device_type"})
+
+	mbusValve := promauto.NewGaugeVec(prometheus.GaugeOpts{
+		Name: "mbus_valve_state",
+		Help: "M-Bus valve/switch position (0=disconnected, 1=connected, 2=ready)",
 	}, []string{"channel"})
 
 	dsmrInfo := promauto.NewGaugeVec(prometheus.GaugeOpts{
@@ -58,6 +67,7 @@ func Register() *Metrics {
 	return &Metrics{
 		gauges:    gauges,
 		mbus:      mbus,
+		mbusValve: mbusValve,
 		dsmrInfo:  dsmrInfo,
 		equipInfo: equipInfo,
 	}

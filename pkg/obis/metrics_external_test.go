@@ -24,6 +24,7 @@ func TestRegister(t *testing.T) {
 	assert.NotNil(t, m.Gauges())
 	assert.NotEmpty(t, m.Gauges())
 	assert.NotNil(t, m.MBus())
+	assert.NotNil(t, m.MBusValve())
 	assert.NotNil(t, m.DSMRInfo())
 	assert.NotNil(t, m.EquipInfo())
 }

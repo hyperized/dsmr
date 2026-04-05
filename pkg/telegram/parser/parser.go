@@ -208,9 +208,15 @@ func (p *Parser) updateMetrics(t *telegram.Telegram) {
 			if len(tv) >= 2 {
 				if vs, ok := tv[1].(string); ok {
 					if f, err := strconv.ParseFloat(vs, 64); err == nil {
-						p.metrics.MBus().WithLabelValues(id[2:3]).Set(f)
+						ch := id[2:3]
+						deviceType := mBusDeviceType(t, ch)
+						p.metrics.MBus().WithLabelValues(ch, deviceType).Set(f)
 					}
 				}
+			}
+		case "0-1:24.4.0", "0-2:24.4.0", "0-3:24.4.0", "0-4:24.4.0":
+			if f, ok := toFloat64(tv[0]); ok {
+				p.metrics.MBusValve().WithLabelValues(id[2:3]).Set(f)
 			}
 		default:
 			metricName := d.MetricName()
@@ -224,6 +230,28 @@ func (p *Parser) updateMetrics(t *telegram.Telegram) {
 			}
 		}
 	}
+}
+
+const deviceTypeUnknown = "unknown"
+
+// mBusDeviceType looks up the device-type value for the given M-Bus channel
+// (e.g. "1") from the telegram's DataMap and returns it as a zero-padded
+// 3-digit string (e.g. "003" for gas). Falls back to deviceTypeUnknown if the
+// device-type line is absent or could not be parsed.
+func mBusDeviceType(t *telegram.Telegram, ch string) string {
+	obisID := "0-" + ch + ":24.1.0"
+	d, ok := t.Data()[obisID]
+	if !ok {
+		return deviceTypeUnknown
+	}
+	tv := d.TypedValues()
+	if len(tv) == 0 {
+		return deviceTypeUnknown
+	}
+	if i, ok := tv[0].(*integer.Integer); ok {
+		return fmt.Sprintf("%03d", i.Value())
+	}
+	return deviceTypeUnknown
 }
 
 func toFloat64(v any) (float64, bool) {

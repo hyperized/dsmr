@@ -702,6 +702,18 @@ var References = map[string]Reference{
 	},
 
 	// M-Bus — channel 1
+	"0-1:24.4.0": {
+		name:        "MBusValveStateChannel1",
+		identifier:  "0-1:24.4.0",
+		description: "M-Bus valve/switch position channel 1 (0=disconnected, 1=connected, 2=ready)",
+		format: Format{
+			tag:          cosem.Integer,
+			class:        cosem.Data,
+			attribute:    cosem.Value,
+			length:       1,
+			formatString: "I1",
+		},
+	},
 	"0-1:24.1.0": {
 		// 0-1:24.1.0(003)
 		name:        "MBusDeviceTypeChannel1",
@@ -741,6 +753,18 @@ var References = map[string]Reference{
 	},
 
 	// M-Bus — channel 2
+	"0-2:24.4.0": {
+		name:        "MBusValveStateChannel2",
+		identifier:  "0-2:24.4.0",
+		description: "M-Bus valve/switch position channel 2 (0=disconnected, 1=connected, 2=ready)",
+		format: Format{
+			tag:          cosem.Integer,
+			class:        cosem.Data,
+			attribute:    cosem.Value,
+			length:       1,
+			formatString: "I1",
+		},
+	},
 	"0-2:24.1.0": {
 		name:        "MBusDeviceTypeChannel2",
 		identifier:  "0-2:24.1.0",
@@ -777,6 +801,18 @@ var References = map[string]Reference{
 	},
 
 	// M-Bus — channel 3
+	"0-3:24.4.0": {
+		name:        "MBusValveStateChannel3",
+		identifier:  "0-3:24.4.0",
+		description: "M-Bus valve/switch position channel 3 (0=disconnected, 1=connected, 2=ready)",
+		format: Format{
+			tag:          cosem.Integer,
+			class:        cosem.Data,
+			attribute:    cosem.Value,
+			length:       1,
+			formatString: "I1",
+		},
+	},
 	"0-3:24.1.0": {
 		name:        "MBusDeviceTypeChannel3",
 		identifier:  "0-3:24.1.0",
@@ -813,6 +849,18 @@ var References = map[string]Reference{
 	},
 
 	// M-Bus — channel 4
+	"0-4:24.4.0": {
+		name:        "MBusValveStateChannel4",
+		identifier:  "0-4:24.4.0",
+		description: "M-Bus valve/switch position channel 4 (0=disconnected, 1=connected, 2=ready)",
+		format: Format{
+			tag:          cosem.Integer,
+			class:        cosem.Data,
+			attribute:    cosem.Value,
+			length:       1,
+			formatString: "I1",
+		},
+	},
 	"0-4:24.1.0": {
 		name:        "MBusDeviceTypeChannel4",
 		identifier:  "0-4:24.1.0",

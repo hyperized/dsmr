@@ -5,6 +5,8 @@ import (
 
 	"github.com/hyperized/dsmr/pkg/cosem/floating_point"
 	"github.com/hyperized/dsmr/pkg/cosem/integer"
+	"github.com/hyperized/dsmr/pkg/telegram"
+	"github.com/hyperized/dsmr/pkg/telegram/data"
 	"github.com/hyperized/dsmr/pkg/telegram/tokenizer"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -47,6 +49,26 @@ func TestHeaderFromTokenizerEdgeCases(t *testing.T) {
 	h, ok = headerFromTokenizer(tok)
 	assert.True(t, ok)
 	assert.NotNil(t, h)
+}
+
+// TestMBusDeviceType exercises every branch of the unexported mBusDeviceType helper.
+func TestMBusDeviceType(t *testing.T) {
+	// Channel absent from DataMap → "unknown".
+	tg := telegram.New()
+	assert.Equal(t, "unknown", mBusDeviceType(tg, "1"))
+
+	// Channel present but TypedValues empty (parse error) → "unknown".
+	d, err := data.New("0-1:24.1.0(INVALID)")
+	require.NoError(t, err)
+	tg.Add("0-1:24.1.0", d)
+	assert.Equal(t, "unknown", mBusDeviceType(tg, "1"))
+
+	// Valid device type → zero-padded 3-digit string.
+	d2, err := data.New("0-2:24.1.0(003)")
+	require.NoError(t, err)
+	tg2 := telegram.New()
+	tg2.Add("0-2:24.1.0", d2)
+	assert.Equal(t, "003", mBusDeviceType(tg2, "2"))
 }
 
 // TestToFloat64 exercises every branch of the unexported toFloat64 helper.
