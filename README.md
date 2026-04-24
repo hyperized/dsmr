@@ -74,11 +74,13 @@ Metrics are served at `http://<listen>/metrics` (redirected from `/`).
 | `dsmr_info` | `version` | `1-3:0.2.8` | DSMR protocol version |
 | `electricity_equipment_info` | `identifier` | `0-0:96.1.1` | Meter equipment identifier |
 
-### M-Bus metric (GaugeVec)
+### M-Bus metrics (GaugeVec)
 
-| Metric | Label | Description |
-|--------|-------|-------------|
-| `mbus_last_value` | `channel` (1–4) | Last 5-minute metered value from connected M-Bus device |
+| Metric | Labels | Source OBIS | Description |
+|--------|--------|-------------|-------------|
+| `mbus_last_value` | `channel`, `device_type` | `0-n:24.2.1` | Last 5-minute metered value from connected M-Bus device |
+| `mbus_valve_state` | `channel` | `0-n:24.4.0` | Valve/switch position (0=disconnected, 1=connected, 2=ready) |
+| `mbus_equipment_info` | `channel`, `identifier` | `0-n:96.1.0` | M-Bus equipment identifier (value always 1) |
 
 ### Electricity gauges
 
@@ -177,15 +179,19 @@ mbus_last_value{channel="1"}
 | `0-1:24.1.0` | M-Bus device type — channel 1 |
 | `0-1:96.1.0` | M-Bus equipment identifier — channel 1 |
 | `0-1:24.2.1` | M-Bus last 5-minute value — channel 1 |
+| `0-1:24.4.0` | M-Bus valve/switch position — channel 1 |
 | `0-2:24.1.0` | M-Bus device type — channel 2 |
 | `0-2:96.1.0` | M-Bus equipment identifier — channel 2 |
 | `0-2:24.2.1` | M-Bus last 5-minute value — channel 2 |
+| `0-2:24.4.0` | M-Bus valve/switch position — channel 2 |
 | `0-3:24.1.0` | M-Bus device type — channel 3 |
 | `0-3:96.1.0` | M-Bus equipment identifier — channel 3 |
 | `0-3:24.2.1` | M-Bus last 5-minute value — channel 3 |
+| `0-3:24.4.0` | M-Bus valve/switch position — channel 3 |
 | `0-4:24.1.0` | M-Bus device type — channel 4 |
 | `0-4:96.1.0` | M-Bus equipment identifier — channel 4 |
 | `0-4:24.2.1` | M-Bus last 5-minute value — channel 4 |
+| `0-4:24.4.0` | M-Bus valve/switch position — channel 4 |
 
 ## Package architecture
 
