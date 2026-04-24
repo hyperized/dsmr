@@ -10,12 +10,12 @@ type GaugesMap map[string]prometheus.Gauge
 
 // Metrics holds all registered Prometheus metrics for DSMR data.
 type Metrics struct {
-	gauges       GaugesMap
-	mbus         *prometheus.GaugeVec
-	mbusValve    *prometheus.GaugeVec
+	gauges        GaugesMap
+	mbus          *prometheus.GaugeVec
+	mbusValve     *prometheus.GaugeVec
 	mbusEquipInfo *prometheus.GaugeVec
-	dsmrInfo     *prometheus.GaugeVec
-	equipInfo    *prometheus.GaugeVec
+	dsmrInfo      *prometheus.GaugeVec
+	equipInfo     *prometheus.GaugeVec
 }
 
 // Gauges returns the per-OBIS scalar gauge map.
@@ -74,11 +74,11 @@ func Register() *Metrics {
 	}, []string{"identifier"})
 
 	return &Metrics{
-		gauges:       gauges,
-		mbus:         mbus,
-		mbusValve:    mbusValve,
+		gauges:        gauges,
+		mbus:          mbus,
+		mbusValve:     mbusValve,
 		mbusEquipInfo: mbusEquipInfo,
-		dsmrInfo:     dsmrInfo,
-		equipInfo:    equipInfo,
+		dsmrInfo:      dsmrInfo,
+		equipInfo:     equipInfo,
 	}
 }
