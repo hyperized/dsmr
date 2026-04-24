@@ -10,11 +10,12 @@ type GaugesMap map[string]prometheus.Gauge
 
 // Metrics holds all registered Prometheus metrics for DSMR data.
 type Metrics struct {
-	gauges    GaugesMap
-	mbus      *prometheus.GaugeVec
-	mbusValve *prometheus.GaugeVec
-	dsmrInfo  *prometheus.GaugeVec
-	equipInfo *prometheus.GaugeVec
+	gauges       GaugesMap
+	mbus         *prometheus.GaugeVec
+	mbusValve    *prometheus.GaugeVec
+	mbusEquipInfo *prometheus.GaugeVec
+	dsmrInfo     *prometheus.GaugeVec
+	equipInfo    *prometheus.GaugeVec
 }
 
 // Gauges returns the per-OBIS scalar gauge map.
@@ -25,6 +26,9 @@ func (m *Metrics) MBus() *prometheus.GaugeVec { return m.mbus }
 
 // MBusValve returns the GaugeVec for M-Bus valve/switch state (label: channel).
 func (m *Metrics) MBusValve() *prometheus.GaugeVec { return m.mbusValve }
+
+// MBusEquipInfo returns the GaugeVec for M-Bus equipment identifier (labels: channel, identifier).
+func (m *Metrics) MBusEquipInfo() *prometheus.GaugeVec { return m.mbusEquipInfo }
 
 // DSMRInfo returns the GaugeVec for DSMR version information labels.
 func (m *Metrics) DSMRInfo() *prometheus.GaugeVec { return m.dsmrInfo }
@@ -54,6 +58,11 @@ func Register() *Metrics {
 		Help: "M-Bus valve/switch position (0=disconnected, 1=connected, 2=ready)",
 	}, []string{"channel"})
 
+	mbusEquipInfo := promauto.NewGaugeVec(prometheus.GaugeOpts{
+		Name: "mbus_equipment_info",
+		Help: "M-Bus equipment identifier (value always 1; channel and identifier in labels)",
+	}, []string{"channel", "identifier"})
+
 	dsmrInfo := promauto.NewGaugeVec(prometheus.GaugeOpts{
 		Name: "dsmr_info",
 		Help: "DSMR version information (value always 1; version in label)",
@@ -65,10 +74,11 @@ func Register() *Metrics {
 	}, []string{"identifier"})
 
 	return &Metrics{
-		gauges:    gauges,
-		mbus:      mbus,
-		mbusValve: mbusValve,
-		dsmrInfo:  dsmrInfo,
-		equipInfo: equipInfo,
+		gauges:       gauges,
+		mbus:         mbus,
+		mbusValve:    mbusValve,
+		mbusEquipInfo: mbusEquipInfo,
+		dsmrInfo:     dsmrInfo,
+		equipInfo:    equipInfo,
 	}
 }

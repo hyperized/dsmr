@@ -214,6 +214,10 @@ func (p *Parser) updateMetrics(t *telegram.Telegram) {
 					}
 				}
 			}
+		case "0-1:96.1.0", "0-2:96.1.0", "0-3:96.1.0", "0-4:96.1.0":
+			if v, ok := tv[0].(string); ok {
+				p.metrics.MBusEquipInfo().WithLabelValues(id[2:3], v).Set(1)
+			}
 		case "0-1:24.4.0", "0-2:24.4.0", "0-3:24.4.0", "0-4:24.4.0":
 			if f, ok := toFloat64(tv[0]); ok {
 				p.metrics.MBusValve().WithLabelValues(id[2:3]).Set(f)
@@ -283,7 +287,14 @@ func (p *Parser) parseLines(ch chan *telegram.Telegram) {
 		}
 
 		if err != nil {
-			slog.Error("scan error", "err", err)
+			// Before the first header (/) arrives the serial port may
+			// deliver startup noise (null bytes, partial frames, etc.).
+			// Only warn when we are mid-telegram where data matters.
+			if current == nil {
+				slog.Debug("ignoring noise before telegram start", "err", err)
+			} else {
+				slog.Error("scan error", "err", err)
+			}
 			continue
 		}
 
