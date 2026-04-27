@@ -1,89 +1,77 @@
-// Package telegram models a complete DSMR P1 telegram: a header, a map of
-// parsed OBIS data lines keyed by OBIS identifier, and a footer with the
-// CRC-16 checksum.
+// Package telegram models a complete DSMR P1 telegram and provides the parser,
+// tokenizer, CRC validator, and supporting types used to read telegrams from
+// an io.Reader and produce parsed values.
 package telegram
 
 import (
+	"iter"
 	"strings"
-
-	"github.com/hyperized/dsmr/pkg/telegram/data"
-	"github.com/hyperized/dsmr/pkg/telegram/footer"
-	"github.com/hyperized/dsmr/pkg/telegram/header"
 )
 
-// OptionsFunc configures a Telegram.
-type OptionsFunc func(t *Telegram)
+// Telegram represents a complete, parsed DSMR P1 telegram: a header, an
+// insertion-ordered set of parsed OBIS data lines keyed by OBIS identifier,
+// and a footer with the CRC-16 checksum.
+type Telegram struct {
+	header *Header
+	keys   []string
+	data   map[string]*Data
+	footer *Footer
+}
 
-// DataMap maps an OBIS identifier string to its parsed Data value.
-type DataMap map[string]*data.Data
-
-// Telegram represents a complete, parsed DSMR P1 telegram.
-type (
-	Telegram struct {
-		header *header.Header
-		data   DataMap
-		footer *footer.Footer
-	}
-)
-
-// New creates an empty Telegram, applying any provided options.
-func New(options ...OptionsFunc) *Telegram {
-	t := &Telegram{
-		header: nil,
-		data:   make(DataMap),
-		footer: nil,
-	}
-
-	for _, o := range options {
-		o(t)
-	}
-
-	return t
+// NewTelegram creates an empty Telegram. Header, data lines and footer are
+// added incrementally by the parser.
+func NewTelegram() *Telegram {
+	return &Telegram{data: map[string]*Data{}}
 }
 
 func (t *Telegram) String() string {
 	var sb strings.Builder
 	sb.WriteString("\nTelegram:\n")
-	sb.WriteString(t.header.String())
-	for _, d := range t.data {
+	if t.header != nil {
+		sb.WriteString(t.header.String())
+	}
+	for _, k := range t.keys {
 		sb.WriteByte('\n')
-		sb.WriteString(d.String())
+		sb.WriteString(t.data[k].String())
 	}
 	sb.WriteByte('\n')
 	return sb.String()
 }
 
-// Data returns the map of parsed OBIS data lines keyed by OBIS identifier.
-func (t *Telegram) Data() DataMap {
-	return t.data
+// Get returns the data line for an OBIS identifier, or nil when absent.
+func (t *Telegram) Get(id string) *Data {
+	return t.data[id]
 }
 
-// WithHeader sets the header on the telegram.
-func WithHeader(h *header.Header) OptionsFunc {
-	return func(t *Telegram) {
-		t.header = h
+// All yields every (identifier, data) pair in insertion order.
+func (t *Telegram) All() iter.Seq2[string, *Data] {
+	return func(yield func(string, *Data) bool) {
+		for _, k := range t.keys {
+			if !yield(k, t.data[k]) {
+				return
+			}
+		}
 	}
 }
 
-// WithFooter sets the footer on the telegram.
-func WithFooter(f *footer.Footer) OptionsFunc {
-	return func(t *Telegram) {
-		t.footer = f
-	}
-}
+// Len returns the number of parsed data lines in this telegram.
+func (t *Telegram) Len() int { return len(t.keys) }
 
-// SetFooter sets the footer after construction (used by the parser).
-func (t *Telegram) SetFooter(f *footer.Footer) {
-	t.footer = f
-}
+// SetHeader sets the header on the telegram.
+func (t *Telegram) SetHeader(h *Header) { t.header = h }
+
+// SetFooter sets the footer on the telegram.
+func (t *Telegram) SetFooter(f *Footer) { t.footer = f }
 
 // Header returns the parsed identification header.
-func (t *Telegram) Header() *header.Header {
-	return t.header
-}
+func (t *Telegram) Header() *Header { return t.header }
 
 // Add stores a parsed data line under its OBIS identifier and returns t for chaining.
-func (t *Telegram) Add(name string, obis *data.Data) *Telegram {
-	t.data[name] = obis
+// Re-adding an existing identifier overwrites the value but preserves its position.
+func (t *Telegram) Add(id string, d *Data) *Telegram {
+	if _, exists := t.data[id]; !exists {
+		t.keys = append(t.keys, id)
+	}
+	t.data[id] = d
 	return t
 }

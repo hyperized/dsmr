@@ -4,7 +4,6 @@ import (
 	"testing"
 
 	"github.com/hyperized/dsmr/pkg/cosem"
-	"github.com/hyperized/dsmr/pkg/cosem/unit"
 	"github.com/hyperized/dsmr/pkg/obis"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -62,7 +61,7 @@ func TestReferenceAccessors(t *testing.T) {
 
 	assert.Equal(t, "MeterReadingElectricityDeliveredToClientTariff1", ref.Name())
 	assert.Equal(t, "1-0:1.8.1", ref.Identifier())
-	assert.Equal(t, unit.KiloWattHour, ref.Unit())
+	assert.Equal(t, cosem.KiloWattHour, ref.Unit())
 	assert.NotEmpty(t, ref.Description())
 	assert.Equal(t, "electricity_delivered_to_client_tariff1_kwh", ref.MetricName())
 }
@@ -72,11 +71,9 @@ func TestFormatAccessors(t *testing.T) {
 	require.NotNil(t, ref)
 
 	f := ref.Format()
-	// Explicit type conversions are required because many cosem constants are
-	// untyped (only the first constant in each typed group has an explicit type).
-	assert.Equal(t, cosem.Cosem(cosem.DoubleLongUnsigned), f.Tag())
-	assert.Equal(t, cosem.Class(cosem.Register), f.Class())
-	assert.Equal(t, cosem.Attribute(cosem.Value), f.Attribute())
+	assert.Equal(t, cosem.TagDoubleLongUnsigned, f.Tag())
+	assert.Equal(t, cosem.Register, f.Class())
+	assert.Equal(t, cosem.Value, f.Attribute())
 	assert.Equal(t, "F9(3,3)", f.FormatString())
 	assert.Equal(t, 9, f.Length())
 	assert.Equal(t, 3, f.MinimumDecimals())

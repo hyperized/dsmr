@@ -36,49 +36,43 @@ func (m *Metrics) DSMRInfo() *prometheus.GaugeVec { return m.dsmrInfo }
 // EquipInfo returns the GaugeVec for electricity equipment identifier labels.
 func (m *Metrics) EquipInfo() *prometheus.GaugeVec { return m.equipInfo }
 
-// Register creates and registers all DSMR Prometheus metrics.
-func Register() *Metrics {
+// Register creates and registers all DSMR Prometheus metrics on reg.
+// Pass prometheus.DefaultRegisterer for the global registry, or a fresh
+// prometheus.NewRegistry() in tests to avoid duplicate-registration panics.
+func Register(reg prometheus.Registerer) *Metrics {
+	factory := promauto.With(reg)
+
 	gauges := make(GaugesMap)
 	for _, ref := range References {
 		if ref.metric.name != "" {
-			gauges[ref.metric.name] = promauto.NewGauge(prometheus.GaugeOpts{
+			gauges[ref.metric.name] = factory.NewGauge(prometheus.GaugeOpts{
 				Name: ref.metric.name,
 				Help: ref.description,
 			})
 		}
 	}
 
-	mbus := promauto.NewGaugeVec(prometheus.GaugeOpts{
-		Name: "mbus_last_value",
-		Help: "M-Bus last 5-minute metered value",
-	}, []string{"channel", "device_type"})
-
-	mbusValve := promauto.NewGaugeVec(prometheus.GaugeOpts{
-		Name: "mbus_valve_state",
-		Help: "M-Bus valve/switch position (0=disconnected, 1=connected, 2=ready)",
-	}, []string{"channel"})
-
-	mbusEquipInfo := promauto.NewGaugeVec(prometheus.GaugeOpts{
-		Name: "mbus_equipment_info",
-		Help: "M-Bus equipment identifier (value always 1; channel and identifier in labels)",
-	}, []string{"channel", "identifier"})
-
-	dsmrInfo := promauto.NewGaugeVec(prometheus.GaugeOpts{
-		Name: "dsmr_info",
-		Help: "DSMR version information (value always 1; version in label)",
-	}, []string{"version"})
-
-	equipInfo := promauto.NewGaugeVec(prometheus.GaugeOpts{
-		Name: "electricity_equipment_info",
-		Help: "Electricity meter equipment identifier (value always 1; identifier in label)",
-	}, []string{"identifier"})
-
 	return &Metrics{
-		gauges:        gauges,
-		mbus:          mbus,
-		mbusValve:     mbusValve,
-		mbusEquipInfo: mbusEquipInfo,
-		dsmrInfo:      dsmrInfo,
-		equipInfo:     equipInfo,
+		gauges: gauges,
+		mbus: factory.NewGaugeVec(prometheus.GaugeOpts{
+			Name: "mbus_last_value",
+			Help: "M-Bus last 5-minute metered value",
+		}, []string{"channel", "device_type"}),
+		mbusValve: factory.NewGaugeVec(prometheus.GaugeOpts{
+			Name: "mbus_valve_state",
+			Help: "M-Bus valve/switch position (0=disconnected, 1=connected, 2=ready)",
+		}, []string{"channel"}),
+		mbusEquipInfo: factory.NewGaugeVec(prometheus.GaugeOpts{
+			Name: "mbus_equipment_info",
+			Help: "M-Bus equipment identifier (value always 1; channel and identifier in labels)",
+		}, []string{"channel", "identifier"}),
+		dsmrInfo: factory.NewGaugeVec(prometheus.GaugeOpts{
+			Name: "dsmr_info",
+			Help: "DSMR version information (value always 1; version in label)",
+		}, []string{"version"}),
+		equipInfo: factory.NewGaugeVec(prometheus.GaugeOpts{
+			Name: "electricity_equipment_info",
+			Help: "Electricity meter equipment identifier (value always 1; identifier in label)",
+		}, []string{"identifier"}),
 	}
 }

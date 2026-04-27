@@ -16,7 +16,8 @@ import (
 	"time"
 
 	"github.com/hyperized/dsmr/pkg/obis"
-	"github.com/hyperized/dsmr/pkg/telegram/parser"
+	"github.com/hyperized/dsmr/pkg/telegram"
+	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"go.bug.st/serial"
 )
@@ -77,8 +78,8 @@ func main() {
 		os.Exit(1)
 	}
 
-	m := obis.Register()
-	p := parser.New(port, parser.WithMetrics(m))
+	m := obis.Register(prometheus.DefaultRegisterer)
+	p := telegram.NewParser(port, telegram.WithMetrics(m))
 
 	done := make(chan struct{})
 	go func() {

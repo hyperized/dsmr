@@ -9,7 +9,6 @@ package obis
 
 import (
 	"github.com/hyperized/dsmr/pkg/cosem"
-	"github.com/hyperized/dsmr/pkg/cosem/unit"
 )
 
 // Metric holds the Prometheus metric name for an OBIS reference.
@@ -36,7 +35,7 @@ type Reference struct {
 	metric        Metric
 	identifier    string
 	description   string
-	unit          unit.Unit
+	unit          cosem.Unit
 	format        Format
 	polyPhaseOnly bool
 }
@@ -44,11 +43,7 @@ type Reference struct {
 // New looks up the OBIS reference for identifier (e.g. "1-0:1.8.1").
 // Returns nil when the identifier is not in the registry.
 func New(reference string) *Reference {
-	r, ok := References[reference]
-	if !ok {
-		return nil
-	}
-	return &r
+	return References[reference]
 }
 
 // Name returns the human-readable name for this OBIS code.
@@ -62,7 +57,7 @@ func (r *Reference) Identifier() string {
 }
 
 // Unit returns the physical unit for this OBIS value (e.g. "kWh").
-func (r *Reference) Unit() unit.Unit {
+func (r *Reference) Unit() cosem.Unit {
 	return r.unit
 }
 
@@ -123,7 +118,7 @@ func (f Format) MaximumDecimals() int {
 }
 
 // References is the registry of all supported OBIS codes, keyed by identifier.
-var References = map[string]Reference{
+var References = map[string]*Reference{
 	// Generic
 	"1-3:0.2.8": {
 		// 1-3:0.2.8(50)
@@ -131,7 +126,7 @@ var References = map[string]Reference{
 		identifier:  "1-3:0.2.8",
 		description: "DSMR version information for P1 output",
 		format: Format{
-			tag:          cosem.OctetString,
+			tag:          cosem.TagOctetString,
 			class:        cosem.Data,
 			attribute:    cosem.Value,
 			length:       2,
@@ -144,7 +139,7 @@ var References = map[string]Reference{
 		identifier:  "0-0:1.0.0",
 		description: "Date-time stamp of the P1 message",
 		format: Format{
-			tag:          cosem.OctetString,
+			tag:          cosem.TagOctetString,
 			class:        cosem.Data,
 			attribute:    cosem.Value,
 			formatString: "TST",
@@ -156,7 +151,7 @@ var References = map[string]Reference{
 		identifier:  "0-0:96.1.1",
 		description: "Equipment identifier (Electricity)",
 		format: Format{
-			tag:          cosem.OctetString,
+			tag:          cosem.TagOctetString,
 			class:        cosem.Data,
 			attribute:    cosem.Value,
 			length:       96,
@@ -173,9 +168,9 @@ var References = map[string]Reference{
 		},
 		identifier:  "1-0:1.8.1",
 		description: "Meter Reading electricity delivered to client (Tariff 1) in 0,001 kWh",
-		unit:        unit.KiloWattHour,
+		unit:        cosem.KiloWattHour,
 		format: Format{
-			tag:             cosem.DoubleLongUnsigned,
+			tag:             cosem.TagDoubleLongUnsigned,
 			class:           cosem.Register,
 			attribute:       cosem.Value,
 			length:          9,
@@ -192,9 +187,9 @@ var References = map[string]Reference{
 		},
 		identifier:  "1-0:1.8.2",
 		description: "Meter Reading electricity delivered to client (Tariff 2) in 0,001 kWh",
-		unit:        unit.KiloWattHour,
+		unit:        cosem.KiloWattHour,
 		format: Format{
-			tag:             cosem.DoubleLongUnsigned,
+			tag:             cosem.TagDoubleLongUnsigned,
 			class:           cosem.Register,
 			attribute:       cosem.Value,
 			length:          9,
@@ -211,9 +206,9 @@ var References = map[string]Reference{
 		},
 		identifier:  "1-0:2.8.1",
 		description: "Meter Reading electricity delivered by client (Tariff 1) in 0,001 kWh",
-		unit:        unit.KiloWattHour,
+		unit:        cosem.KiloWattHour,
 		format: Format{
-			tag:             cosem.DoubleLongUnsigned,
+			tag:             cosem.TagDoubleLongUnsigned,
 			class:           cosem.Register,
 			attribute:       cosem.Value,
 			length:          9,
@@ -230,9 +225,9 @@ var References = map[string]Reference{
 		},
 		identifier:  "1-0:2.8.2",
 		description: "Meter Reading electricity delivered by client (Tariff 2) in 0,001 kWh",
-		unit:        unit.KiloWattHour,
+		unit:        cosem.KiloWattHour,
 		format: Format{
-			tag:             cosem.DoubleLongUnsigned,
+			tag:             cosem.TagDoubleLongUnsigned,
 			class:           cosem.Register,
 			attribute:       cosem.Value,
 			length:          9,
@@ -252,7 +247,7 @@ var References = map[string]Reference{
 		identifier:  "0-0:96.14.0",
 		description: "Tariff indicator electricity",
 		format: Format{
-			tag:          cosem.OctetString,
+			tag:          cosem.TagOctetString,
 			class:        cosem.Data,
 			attribute:    cosem.Value,
 			length:       4,
@@ -267,9 +262,9 @@ var References = map[string]Reference{
 		},
 		identifier:  "1-0:1.7.0",
 		description: "Actual electricity power delivered (+P) in 1 Watt resolution",
-		unit:        unit.KiloWatt,
+		unit:        cosem.KiloWatt,
 		format: Format{
-			tag:             cosem.LongUnsigned,
+			tag:             cosem.TagLongUnsigned,
 			class:           cosem.Register,
 			attribute:       cosem.Value,
 			length:          5,
@@ -286,9 +281,9 @@ var References = map[string]Reference{
 		},
 		identifier:  "1-0:2.7.0",
 		description: "Actual electricity power received (-P) in 1 Watt resolution",
-		unit:        unit.KiloWatt,
+		unit:        cosem.KiloWatt,
 		format: Format{
-			tag:             cosem.LongUnsigned,
+			tag:             cosem.TagLongUnsigned,
 			class:           cosem.Register,
 			attribute:       cosem.Value,
 			length:          5,
@@ -308,7 +303,7 @@ var References = map[string]Reference{
 		identifier:  "0-0:96.7.21",
 		description: "Number of power failures in any phase",
 		format: Format{
-			tag:          cosem.LongUnsigned,
+			tag:          cosem.TagLongUnsigned,
 			class:        cosem.Data,
 			attribute:    cosem.Value,
 			length:       5,
@@ -324,7 +319,7 @@ var References = map[string]Reference{
 		identifier:  "0-0:96.7.9",
 		description: "Number of long power failures in any phase",
 		format: Format{
-			tag:          cosem.LongUnsigned,
+			tag:          cosem.TagLongUnsigned,
 			class:        cosem.Data,
 			attribute:    cosem.Value,
 			length:       5,
@@ -337,7 +332,7 @@ var References = map[string]Reference{
 		identifier:  "1-0:99.97.0",
 		description: "Power failure event log",
 		format: Format{
-			tag:          cosem.OctetString,
+			tag:          cosem.TagOctetString,
 			class:        cosem.GenericProfile,
 			attribute:    cosem.Buffer,
 			formatString: "TST",
@@ -354,7 +349,7 @@ var References = map[string]Reference{
 		identifier:  "1-0:32.32.0",
 		description: "Number of voltage sags in Phase L1",
 		format: Format{
-			tag:          cosem.LongUnsigned,
+			tag:          cosem.TagLongUnsigned,
 			class:        cosem.Data,
 			attribute:    cosem.Value,
 			length:       5,
@@ -371,7 +366,7 @@ var References = map[string]Reference{
 		description:   "Number of voltage sags in Phase L2",
 		polyPhaseOnly: true,
 		format: Format{
-			tag:          cosem.LongUnsigned,
+			tag:          cosem.TagLongUnsigned,
 			class:        cosem.Data,
 			attribute:    cosem.Value,
 			length:       5,
@@ -388,7 +383,7 @@ var References = map[string]Reference{
 		description:   "Number of voltage sags in Phase L3",
 		polyPhaseOnly: true,
 		format: Format{
-			tag:          cosem.LongUnsigned,
+			tag:          cosem.TagLongUnsigned,
 			class:        cosem.Data,
 			attribute:    cosem.Value,
 			length:       5,
@@ -406,7 +401,7 @@ var References = map[string]Reference{
 		identifier:  "1-0:32.36.0",
 		description: "Number of voltage swells in Phase L1",
 		format: Format{
-			tag:          cosem.LongUnsigned,
+			tag:          cosem.TagLongUnsigned,
 			class:        cosem.Data,
 			attribute:    cosem.Value,
 			length:       5,
@@ -423,7 +418,7 @@ var References = map[string]Reference{
 		description:   "Number of voltage swells in Phase L2",
 		polyPhaseOnly: true,
 		format: Format{
-			tag:          cosem.LongUnsigned,
+			tag:          cosem.TagLongUnsigned,
 			class:        cosem.Data,
 			attribute:    cosem.Value,
 			length:       5,
@@ -440,7 +435,7 @@ var References = map[string]Reference{
 		description:   "Number of voltage swells in Phase L3",
 		polyPhaseOnly: true,
 		format: Format{
-			tag:          cosem.LongUnsigned,
+			tag:          cosem.TagLongUnsigned,
 			class:        cosem.Data,
 			attribute:    cosem.Value,
 			length:       5,
@@ -455,7 +450,7 @@ var References = map[string]Reference{
 		identifier:  "0-0:96.13.0",
 		description: "Text message max 2048 characters",
 		format: Format{
-			tag:          cosem.OctetString,
+			tag:          cosem.TagOctetString,
 			class:        cosem.Data,
 			attribute:    cosem.Value,
 			length:       2048,
@@ -472,9 +467,9 @@ var References = map[string]Reference{
 		},
 		identifier:  "1-0:32.7.0",
 		description: "Instantaneous voltage L1 in V resolution",
-		unit:        unit.Volt,
+		unit:        cosem.Volt,
 		format: Format{
-			tag:             cosem.LongUnsigned,
+			tag:             cosem.TagLongUnsigned,
 			class:           cosem.Register,
 			attribute:       cosem.Value,
 			length:          4,
@@ -491,10 +486,10 @@ var References = map[string]Reference{
 		},
 		identifier:    "1-0:52.7.0",
 		description:   "Instantaneous voltage L2 in V resolution",
-		unit:          unit.Volt,
+		unit:          cosem.Volt,
 		polyPhaseOnly: true,
 		format: Format{
-			tag:             cosem.LongUnsigned,
+			tag:             cosem.TagLongUnsigned,
 			class:           cosem.Register,
 			attribute:       cosem.Value,
 			length:          4,
@@ -511,10 +506,10 @@ var References = map[string]Reference{
 		},
 		identifier:    "1-0:72.7.0",
 		description:   "Instantaneous voltage L3 in V resolution",
-		unit:          unit.Volt,
+		unit:          cosem.Volt,
 		polyPhaseOnly: true,
 		format: Format{
-			tag:             cosem.LongUnsigned,
+			tag:             cosem.TagLongUnsigned,
 			class:           cosem.Register,
 			attribute:       cosem.Value,
 			length:          4,
@@ -533,9 +528,9 @@ var References = map[string]Reference{
 		},
 		identifier:  "1-0:31.7.0",
 		description: "Instantaneous current L1 in A resolution",
-		unit:        unit.Ampere,
+		unit:        cosem.Ampere,
 		format: Format{
-			tag:          cosem.LongUnsigned,
+			tag:          cosem.TagLongUnsigned,
 			class:        cosem.Register,
 			attribute:    cosem.Value,
 			length:       3,
@@ -550,10 +545,10 @@ var References = map[string]Reference{
 		},
 		identifier:    "1-0:51.7.0",
 		description:   "Instantaneous current L2 in A resolution",
-		unit:          unit.Ampere,
+		unit:          cosem.Ampere,
 		polyPhaseOnly: true,
 		format: Format{
-			tag:          cosem.LongUnsigned,
+			tag:          cosem.TagLongUnsigned,
 			class:        cosem.Register,
 			attribute:    cosem.Value,
 			length:       3,
@@ -568,10 +563,10 @@ var References = map[string]Reference{
 		},
 		identifier:    "1-0:71.7.0",
 		description:   "Instantaneous current L3 in A resolution",
-		unit:          unit.Ampere,
+		unit:          cosem.Ampere,
 		polyPhaseOnly: true,
 		format: Format{
-			tag:          cosem.LongUnsigned,
+			tag:          cosem.TagLongUnsigned,
 			class:        cosem.Register,
 			attribute:    cosem.Value,
 			length:       3,
@@ -588,9 +583,9 @@ var References = map[string]Reference{
 		},
 		identifier:  "1-0:21.7.0",
 		description: "Instantaneous active power L1 (+P) in W resolution",
-		unit:        unit.KiloWatt,
+		unit:        cosem.KiloWatt,
 		format: Format{
-			tag:             cosem.LongUnsigned,
+			tag:             cosem.TagLongUnsigned,
 			class:           cosem.Register,
 			attribute:       cosem.Value,
 			length:          5,
@@ -607,10 +602,10 @@ var References = map[string]Reference{
 		},
 		identifier:    "1-0:41.7.0",
 		description:   "Instantaneous active power L2 (+P) in W resolution",
-		unit:          unit.KiloWatt,
+		unit:          cosem.KiloWatt,
 		polyPhaseOnly: true,
 		format: Format{
-			tag:             cosem.LongUnsigned,
+			tag:             cosem.TagLongUnsigned,
 			class:           cosem.Register,
 			attribute:       cosem.Value,
 			length:          5,
@@ -627,10 +622,10 @@ var References = map[string]Reference{
 		},
 		identifier:    "1-0:61.7.0",
 		description:   "Instantaneous active power L3 (+P) in W resolution",
-		unit:          unit.KiloWatt,
+		unit:          cosem.KiloWatt,
 		polyPhaseOnly: true,
 		format: Format{
-			tag:             cosem.LongUnsigned,
+			tag:             cosem.TagLongUnsigned,
 			class:           cosem.Register,
 			attribute:       cosem.Value,
 			length:          5,
@@ -649,9 +644,9 @@ var References = map[string]Reference{
 		},
 		identifier:  "1-0:22.7.0",
 		description: "Instantaneous active power L1 (-P) in W resolution",
-		unit:        unit.KiloWatt,
+		unit:        cosem.KiloWatt,
 		format: Format{
-			tag:             cosem.LongUnsigned,
+			tag:             cosem.TagLongUnsigned,
 			class:           cosem.Register,
 			attribute:       cosem.Value,
 			length:          5,
@@ -668,10 +663,10 @@ var References = map[string]Reference{
 		},
 		identifier:    "1-0:42.7.0",
 		description:   "Instantaneous active power L2 (-P) in W resolution",
-		unit:          unit.KiloWatt,
+		unit:          cosem.KiloWatt,
 		polyPhaseOnly: true,
 		format: Format{
-			tag:             cosem.LongUnsigned,
+			tag:             cosem.TagLongUnsigned,
 			class:           cosem.Register,
 			attribute:       cosem.Value,
 			length:          5,
@@ -688,10 +683,10 @@ var References = map[string]Reference{
 		},
 		identifier:    "1-0:62.7.0",
 		description:   "Instantaneous active power L3 (-P) in W resolution",
-		unit:          unit.KiloWatt,
+		unit:          cosem.KiloWatt,
 		polyPhaseOnly: true,
 		format: Format{
-			tag:             cosem.LongUnsigned,
+			tag:             cosem.TagLongUnsigned,
 			class:           cosem.Register,
 			attribute:       cosem.Value,
 			length:          5,
@@ -707,7 +702,7 @@ var References = map[string]Reference{
 		identifier:  "0-1:24.4.0",
 		description: "M-Bus valve/switch position channel 1 (0=disconnected, 1=connected, 2=ready)",
 		format: Format{
-			tag:          cosem.Integer,
+			tag:          cosem.TagInteger,
 			class:        cosem.Data,
 			attribute:    cosem.Value,
 			length:       1,
@@ -720,7 +715,7 @@ var References = map[string]Reference{
 		identifier:  "0-1:24.1.0",
 		description: "M-Bus Device-Type channel 1",
 		format: Format{
-			tag:          cosem.LongUnsigned,
+			tag:          cosem.TagLongUnsigned,
 			class:        cosem.Data,
 			attribute:    cosem.Value,
 			length:       3,
@@ -733,7 +728,7 @@ var References = map[string]Reference{
 		identifier:  "0-1:96.1.0",
 		description: "M-Bus equipment identifier channel 1",
 		format: Format{
-			tag:          cosem.OctetString,
+			tag:          cosem.TagOctetString,
 			class:        cosem.Data,
 			attribute:    cosem.Value,
 			length:       96,
@@ -758,7 +753,7 @@ var References = map[string]Reference{
 		identifier:  "0-2:24.4.0",
 		description: "M-Bus valve/switch position channel 2 (0=disconnected, 1=connected, 2=ready)",
 		format: Format{
-			tag:          cosem.Integer,
+			tag:          cosem.TagInteger,
 			class:        cosem.Data,
 			attribute:    cosem.Value,
 			length:       1,
@@ -770,7 +765,7 @@ var References = map[string]Reference{
 		identifier:  "0-2:24.1.0",
 		description: "M-Bus Device-Type channel 2",
 		format: Format{
-			tag:          cosem.LongUnsigned,
+			tag:          cosem.TagLongUnsigned,
 			class:        cosem.Data,
 			attribute:    cosem.Value,
 			length:       3,
@@ -782,7 +777,7 @@ var References = map[string]Reference{
 		identifier:  "0-2:96.1.0",
 		description: "M-Bus equipment identifier channel 2",
 		format: Format{
-			tag:          cosem.OctetString,
+			tag:          cosem.TagOctetString,
 			class:        cosem.Data,
 			attribute:    cosem.Value,
 			length:       96,
@@ -806,7 +801,7 @@ var References = map[string]Reference{
 		identifier:  "0-3:24.4.0",
 		description: "M-Bus valve/switch position channel 3 (0=disconnected, 1=connected, 2=ready)",
 		format: Format{
-			tag:          cosem.Integer,
+			tag:          cosem.TagInteger,
 			class:        cosem.Data,
 			attribute:    cosem.Value,
 			length:       1,
@@ -818,7 +813,7 @@ var References = map[string]Reference{
 		identifier:  "0-3:24.1.0",
 		description: "M-Bus Device-Type channel 3",
 		format: Format{
-			tag:          cosem.LongUnsigned,
+			tag:          cosem.TagLongUnsigned,
 			class:        cosem.Data,
 			attribute:    cosem.Value,
 			length:       3,
@@ -830,7 +825,7 @@ var References = map[string]Reference{
 		identifier:  "0-3:96.1.0",
 		description: "M-Bus equipment identifier channel 3",
 		format: Format{
-			tag:          cosem.OctetString,
+			tag:          cosem.TagOctetString,
 			class:        cosem.Data,
 			attribute:    cosem.Value,
 			length:       96,
@@ -854,7 +849,7 @@ var References = map[string]Reference{
 		identifier:  "0-4:24.4.0",
 		description: "M-Bus valve/switch position channel 4 (0=disconnected, 1=connected, 2=ready)",
 		format: Format{
-			tag:          cosem.Integer,
+			tag:          cosem.TagInteger,
 			class:        cosem.Data,
 			attribute:    cosem.Value,
 			length:       1,
@@ -866,7 +861,7 @@ var References = map[string]Reference{
 		identifier:  "0-4:24.1.0",
 		description: "M-Bus Device-Type channel 4",
 		format: Format{
-			tag:          cosem.LongUnsigned,
+			tag:          cosem.TagLongUnsigned,
 			class:        cosem.Data,
 			attribute:    cosem.Value,
 			length:       3,
@@ -878,7 +873,7 @@ var References = map[string]Reference{
 		identifier:  "0-4:96.1.0",
 		description: "M-Bus equipment identifier channel 4",
 		format: Format{
-			tag:          cosem.OctetString,
+			tag:          cosem.TagOctetString,
 			class:        cosem.Data,
 			attribute:    cosem.Value,
 			length:       96,
