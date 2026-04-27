@@ -1,4 +1,6 @@
 # dsmr
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fhyperized%2Fdsmr.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2Fhyperized%2Fdsmr?ref=badge_shield)
+
 
 An idiomatic Go implementation of a DSMR 5.0.2 P1 telegram parser and Prometheus metrics exporter.
 
@@ -205,3 +207,7 @@ pkg/
                # footer parsers, CRC-16/IBM validator, and the streaming
                # Parser that drives them and feeds Prometheus.
 ```
+
+## License
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fhyperized%2Fdsmr.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2Fhyperized%2Fdsmr?ref=badge_large)
+
