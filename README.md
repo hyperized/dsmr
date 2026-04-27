@@ -6,6 +6,21 @@ An idiomatic Go implementation of a DSMR 5.0.2 P1 telegram parser and Prometheus
 
 Connects to the P1 serial port on a Dutch smart meter, parses each telegram, and exposes all measurements as Prometheus gauges.
 
+## Contents
+
+- [Requirements](#requirements)
+- [Development](#development)
+- [Build](#build)
+- [Run](#run)
+- [Deployment (Raspberry Pi Zero W + DietPi)](#deployment-raspberry-pi-zero-w--dietpi)
+- [Prometheus metrics](#prometheus-metrics)
+- [Supported OBIS codes](#supported-obis-codes)
+- [Package architecture](#package-architecture)
+- [Sinks](#sinks)
+  - [Built-in sink: Prometheus](#built-in-sink-prometheus)
+  - [Writing a custom sink](#writing-a-custom-sink)
+- [License](#license)
+
 ## Requirements
 
 - Go 1.26+
@@ -253,7 +268,7 @@ pkg/
                    # and the Sink interface that consumes its output.
 ```
 
-## Library usage
+## Sinks
 
 The parser is decoupled from any specific output. Each consumer implements
 `telegram.Sink` and registers with `telegram.WithSink`; the parser fans every
