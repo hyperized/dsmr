@@ -197,21 +197,11 @@ mbus_last_value{channel="1"}
 
 ```
 pkg/
-├── cosem/               # COSEM type system (IEC 62056)
-│   ├── enum/            # Enumeration type (tag 22)
-│   ├── floating_point/  # Floating-point with format constraints (Fn(x,y))
-│   ├── integer/         # Fixed-width integer
-│   ├── octet_string/    # Hex-encoded octet string
-│   ├── string/          # Visible string with length constraints
-│   ├── timestamp/       # YYMMDDhhmmssX timestamp with DST flag
-│   └── unit/            # SI unit constants (kWh, kW, V, A, …)
-├── obis/                # OBIS reference registry and Prometheus metrics
-└── telegram/            # P1 telegram parsing pipeline
-    ├── crc/             # CRC-16/IBM checksum
-    ├── data/            # OBIS data line parser
-    ├── footer/          # Telegram footer (! + CRC)
-    ├── header/          # Telegram header (/MFRbident)
-    ├── parser/          # Stream parser — orchestrates tokenizer → data → metrics
-    ├── token/           # Lexer token
-    └── tokenizer/       # Line tokenizer
+├── cosem/     # COSEM type system (IEC 62056): Enum, FloatingPoint, Integer,
+│              # OctetString, String, Timestamp, plus SI unit constants and
+│              # data-tag / class / attribute identifiers.
+├── obis/      # OBIS reference registry and Prometheus metrics registration.
+└── telegram/  # P1 telegram parsing pipeline: line tokenizer, header / data /
+               # footer parsers, CRC-16/IBM validator, and the streaming
+               # Parser that drives them and feeds Prometheus.
 ```
