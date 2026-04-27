@@ -16,6 +16,7 @@ import (
 	"time"
 
 	"github.com/hyperized/dsmr/pkg/obis"
+	"github.com/hyperized/dsmr/pkg/sink/prom"
 	"github.com/hyperized/dsmr/pkg/telegram"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
@@ -79,7 +80,7 @@ func main() {
 	}
 
 	m := obis.Register(prometheus.DefaultRegisterer)
-	p := telegram.NewParser(port, telegram.WithMetrics(m))
+	p := telegram.NewParser(port, telegram.WithSink(prom.New(m)))
 
 	done := make(chan struct{})
 	go func() {

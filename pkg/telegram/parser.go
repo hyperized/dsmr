@@ -6,10 +6,6 @@ import (
 	"io"
 	"iter"
 	"log/slog"
-	"strconv"
-
-	"github.com/hyperized/dsmr/pkg/cosem"
-	"github.com/hyperized/dsmr/pkg/obis"
 )
 
 // Parser reads a stream of DSMR P1 telegrams line by line.
@@ -17,7 +13,7 @@ type Parser struct {
 	scanner     *bufio.Scanner
 	lineEnding  string
 	validateCRC bool
-	metrics     *obis.Metrics
+	sinks       []Sink
 }
 
 // OptionFunc configures a Parser.
@@ -30,9 +26,11 @@ func WithLineEnding(le string) OptionFunc {
 	return func(p *Parser) { p.lineEnding = le }
 }
 
-// WithMetrics injects a Metrics instance so parsed telegrams update Prometheus.
-func WithMetrics(m *obis.Metrics) OptionFunc {
-	return func(p *Parser) { p.metrics = m }
+// WithSink registers a Sink to receive every successfully parsed telegram.
+// May be called multiple times; sinks are invoked in registration order and
+// per-sink errors are logged but do not interrupt the stream.
+func WithSink(s Sink) OptionFunc {
+	return func(p *Parser) { p.sinks = append(p.sinks, s) }
 }
 
 // WithCRCValidation enables or disables CRC validation. Defaults to true.
@@ -196,93 +194,16 @@ func (p *Parser) Telegrams() iter.Seq[*Telegram] {
 	}
 }
 
-// ParseStream continuously processes telegrams, updating Prometheus metrics
-// for each complete telegram.
+// ParseStream continuously processes telegrams, dispatching each one to every
+// registered sink in order. Per-sink errors are logged and do not interrupt
+// the stream.
 func (p *Parser) ParseStream() {
 	for t := range p.Telegrams() {
 		slog.Debug("telegram parsed", "content", t.String())
-		if p.metrics != nil {
-			p.updateMetrics(t)
-		}
-	}
-}
-
-// updateMetrics iterates the telegram's data lines in insertion order and
-// updates all registered Prometheus metrics.
-func (p *Parser) updateMetrics(t *Telegram) {
-	for id, d := range t.All() {
-		tv := d.TypedValues()
-		if len(tv) == 0 {
-			continue
-		}
-
-		switch id {
-		case "1-3:0.2.8":
-			if v, ok := tv[0].(string); ok {
-				p.metrics.DSMRInfo().WithLabelValues(v).Set(1)
-			}
-		case "0-0:96.1.1":
-			if v, ok := tv[0].(string); ok {
-				p.metrics.EquipInfo().WithLabelValues(v).Set(1)
-			}
-		case "0-1:24.2.1", "0-2:24.2.1", "0-3:24.2.1", "0-4:24.2.1":
-			if len(tv) >= 2 {
-				if vs, ok := tv[1].(string); ok {
-					if f, err := strconv.ParseFloat(vs, 64); err == nil {
-						ch := id[2:3]
-						p.metrics.MBus().WithLabelValues(ch, mBusDeviceType(t, ch)).Set(f)
-					}
-				}
-			}
-		case "0-1:96.1.0", "0-2:96.1.0", "0-3:96.1.0", "0-4:96.1.0":
-			if v, ok := tv[0].(string); ok {
-				p.metrics.MBusEquipInfo().WithLabelValues(id[2:3], v).Set(1)
-			}
-		case "0-1:24.4.0", "0-2:24.4.0", "0-3:24.4.0", "0-4:24.4.0":
-			if f, ok := toFloat64(tv[0]); ok {
-				p.metrics.MBusValve().WithLabelValues(id[2:3]).Set(f)
-			}
-		default:
-			metricName := d.MetricName()
-			if metricName == "" {
-				continue
-			}
-			if gauge, ok := p.metrics.Gauges()[metricName]; ok {
-				if f, ok := toFloat64(tv[0]); ok {
-					gauge.Set(f)
-				}
+		for _, s := range p.sinks {
+			if err := s.Write(t); err != nil {
+				slog.Warn("sink write failed", "err", err)
 			}
 		}
 	}
-}
-
-const deviceTypeUnknown = "unknown"
-
-// mBusDeviceType returns the raw device-type string from the telegram's
-// 0-n:24.1.0 line for channel ch (e.g. "003"), or deviceTypeUnknown if the
-// device-type line is absent or yielded no values.
-func mBusDeviceType(t *Telegram, ch string) string {
-	d := t.Get("0-" + ch + ":24.1.0")
-	if d == nil {
-		return deviceTypeUnknown
-	}
-	vals := d.Values()
-	if len(vals) == 0 {
-		return deviceTypeUnknown
-	}
-	return vals[0]
-}
-
-func toFloat64(v any) (float64, bool) {
-	switch x := v.(type) {
-	case *cosem.FloatingPoint:
-		return x.Value(), true
-	case *cosem.Integer:
-		return float64(x.Value()), true
-	case string:
-		if f, err := strconv.ParseFloat(x, 64); err == nil {
-			return f, true
-		}
-	}
-	return 0, false
 }

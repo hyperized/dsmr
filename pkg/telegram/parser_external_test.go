@@ -5,18 +5,25 @@ import (
 	"fmt"
 	"slices"
 	"strings"
+	"sync/atomic"
 	"testing"
 	"testing/iotest"
 
-	"github.com/hyperized/dsmr/pkg/obis"
 	"github.com/hyperized/dsmr/pkg/telegram"
-	"github.com/prometheus/client_golang/prometheus"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
-func newTestMetrics() *obis.Metrics {
-	return obis.Register(prometheus.NewRegistry())
+// fakeSink is a thread-safe Sink for tests. Optional err lets tests exercise
+// the parser's per-sink error-logging path without aborting the stream.
+type fakeSink struct {
+	count atomic.Int32
+	err   error
+}
+
+func (f *fakeSink) Write(_ *telegram.Telegram) error {
+	f.count.Add(1)
+	return f.err
 }
 
 // TestParseCRCValidation builds a minimal synthetic telegram with CRLF line
@@ -118,44 +125,52 @@ func TestParseCRCMismatchDropsTelegram(t *testing.T) {
 	assert.Empty(t, telegrams, "telegram with wrong CRC should be dropped")
 }
 
-// TestParseStreamWithMetrics exercises ParseStream → handleTelegram →
-// updateMetrics using a telegram that covers every branch of updateMetrics:
-//   - "1-3:0.2.8"          DSMRInfo GaugeVec branch
-//   - "0-0:96.1.1"         EquipInfo GaugeVec branch
-//   - "0-1:24.1.0"         device-type lookup for MBus label
-//   - "0-1:96.1.0"         MBusEquipInfo GaugeVec branch
-//   - "0-1:24.2.1"         MBus GaugeVec branch (channel + device_type labels)
-//   - "0-1:24.4.0"         MBusValve GaugeVec branch
-//   - "1-0:1.8.1"          default branch, FloatingPoint gauge (toFloat64 float path)
-//   - "0-0:96.14.0"        default branch, string gauge   (toFloat64 string path)
-//   - "0-0:1.0.0"          default branch, no metric name → continue
-//   - "1-0:99.97.0"        GenericProfile → TypedValues nil → continue
-func TestParseStreamWithMetrics(_ *testing.T) {
+// TestParseStreamMultipleSinks verifies that every registered sink receives
+// each parsed telegram in registration order.
+func TestParseStreamMultipleSinks(t *testing.T) {
 	const le = "\r\n"
-	content := "/ISk5\\2MT382-1000" + le +
-		le +
-		"1-3:0.2.8(50)" + le +
-		"0-0:96.1.1(4B384547303034303436333935353037)" + le +
-		"0-1:24.1.0(003)" + le +
-		"0-1:96.1.0(3232323241424344313233343536373839)" + le +
-		"0-1:24.2.1(101209112500W)(12785.123*m3)" + le +
-		"0-1:24.4.0(1)" + le +
-		"1-0:1.8.1(123456.789*kWh)" + le +
-		"0-0:96.14.0(0002)" + le +
-		"0-0:1.0.0(101209113020W)" + le +
-		"1-0:99.97.0(2)(0-0:96.7.19)" + le +
-		"!0000\n"
+	content := "/ISk5\\2MT382-1000" + le + le + "!0000\n" +
+		"/ISk5\\2MT382-1000" + le + le + "!0000\n"
+
+	a := &fakeSink{}
+	b := &fakeSink{}
 
 	p := telegram.NewParser(strings.NewReader(content),
 		telegram.WithLineEnding(le),
 		telegram.WithCRCValidation(false),
-		telegram.WithMetrics(newTestMetrics()),
+		telegram.WithSink(a),
+		telegram.WithSink(b),
 	)
 	p.ParseStream()
+
+	assert.Equal(t, int32(2), a.count.Load())
+	assert.Equal(t, int32(2), b.count.Load())
 }
 
-// TestParseStreamNoMetrics exercises the ParseStream nil-metrics branch.
-func TestParseStreamNoMetrics(_ *testing.T) {
+// TestParseStreamSinkErrorLogged verifies that a sink returning an error is
+// logged but does not interrupt the stream or starve later sinks.
+func TestParseStreamSinkErrorLogged(t *testing.T) {
+	const le = "\r\n"
+	content := "/ISk5\\2MT382-1000" + le + le + "!0000\n"
+
+	failing := &fakeSink{err: errors.New("boom")}
+	healthy := &fakeSink{}
+
+	p := telegram.NewParser(strings.NewReader(content),
+		telegram.WithLineEnding(le),
+		telegram.WithCRCValidation(false),
+		telegram.WithSink(failing),
+		telegram.WithSink(healthy),
+	)
+	p.ParseStream()
+
+	assert.Equal(t, int32(1), failing.count.Load())
+	assert.Equal(t, int32(1), healthy.count.Load(), "later sink must still receive the telegram")
+}
+
+// TestParseStreamNoSinks verifies that ParseStream is a no-op for the
+// telegram body when no sinks are registered.
+func TestParseStreamNoSinks(_ *testing.T) {
 	const le = "\r\n"
 	content := "/ISk5\\2MT382-1000" + le + le + "!0000\n"
 
@@ -216,9 +231,9 @@ func TestParseScannerError(t *testing.T) {
 // iterator when the caller breaks after the first telegram.
 func TestTelegramsEarlyBreak(t *testing.T) {
 	const le = "\r\n"
-	telegram1 := "/ISk5\\2MT382-1000" + le + le + "!0000" + le
-	telegram2 := "/ISk5\\2MT382-1000" + le + le + "!0000" + le
-	content := telegram1 + telegram2
+	tg1 := "/ISk5\\2MT382-1000" + le + le + "!0000" + le
+	tg2 := "/ISk5\\2MT382-1000" + le + le + "!0000" + le
+	content := tg1 + tg2
 
 	p := telegram.NewParser(strings.NewReader(content),
 		telegram.WithLineEnding(le),

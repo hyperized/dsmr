@@ -241,13 +241,113 @@ mbus_last_value{channel="1"}
 
 ```
 pkg/
-├── cosem/     # COSEM type system (IEC 62056): Enum, FloatingPoint, Integer,
-│              # OctetString, String, Timestamp, plus SI unit constants and
-│              # data-tag / class / attribute identifiers.
-├── obis/      # OBIS reference registry and Prometheus metrics registration.
-└── telegram/  # P1 telegram parsing pipeline: line tokenizer, header / data /
-               # footer parsers, CRC-16/IBM validator, and the streaming
-               # Parser that drives them and feeds Prometheus.
+├── cosem/         # COSEM type system (IEC 62056): Enum, FloatingPoint, Integer,
+│                  # OctetString, String, Timestamp, plus SI unit constants and
+│                  # data-tag / class / attribute identifiers.
+├── obis/          # OBIS reference registry and Prometheus metrics registration.
+├── sink/
+│   └── prom/      # telegram.Sink that translates parsed telegrams into
+│                  # Prometheus gauge updates.
+└── telegram/      # P1 telegram parsing pipeline: line tokenizer, header / data /
+                   # footer parsers, CRC-16/IBM validator, the streaming Parser,
+                   # and the Sink interface that consumes its output.
+```
+
+## Library usage
+
+The parser is decoupled from any specific output. Each consumer implements
+`telegram.Sink` and registers with `telegram.WithSink`; the parser fans every
+successfully-CRC-validated telegram out to all sinks in registration order.
+Sink errors are logged but do not interrupt the stream.
+
+```go
+// telegram.Sink — any type that implements this can receive parsed telegrams.
+type Sink interface {
+    Write(t *Telegram) error
+}
+```
+
+### Built-in sink: Prometheus
+
+```go
+import (
+    "github.com/hyperized/dsmr/pkg/obis"
+    "github.com/hyperized/dsmr/pkg/sink/prom"
+    "github.com/hyperized/dsmr/pkg/telegram"
+    "github.com/prometheus/client_golang/prometheus"
+)
+
+m := obis.Register(prometheus.DefaultRegisterer)
+p := telegram.NewParser(serialPort, telegram.WithSink(prom.New(m)))
+p.ParseStream()
+```
+
+### Writing a custom sink
+
+The Sink interface intentionally has a single method, so any destination —
+a relational DB, a time-series store, a file, a message broker — is a
+small adapter. Implementations are responsible for their own thread safety
+and resource cleanup; sinks holding open connections should additionally
+implement `io.Closer` so the caller can close them at shutdown.
+
+Below is a sketch of a sink that persists raw telegrams to a SQL store
+(TimescaleDB, ClickHouse, plain Postgres — your choice of driver and
+schema). The DSMR module deliberately does **not** ship database drivers:
+pulling in `pgx` or the ClickHouse SDK is a decision for the application
+that wires the sink, not the parsing library.
+
+```go
+package mysink
+
+import (
+    "context"
+    "database/sql"
+    "time"
+
+    "github.com/hyperized/dsmr/pkg/telegram"
+)
+
+// Sink persists each telegram as a row keyed by ingest time.
+//
+// Schema (TimescaleDB):
+//
+//	CREATE TABLE telegrams (
+//	    received_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+//	    telegram    TEXT        NOT NULL
+//	);
+//	SELECT create_hypertable('telegrams', 'received_at');
+//
+// Schema (ClickHouse):
+//
+//	CREATE TABLE telegrams (
+//	    received_at DateTime64(3) DEFAULT now64(),
+//	    telegram    String
+//	) ENGINE = MergeTree() ORDER BY received_at;
+type Sink struct {
+    db      *sql.DB
+    timeout time.Duration
+}
+
+func New(db *sql.DB) *Sink {
+    return &Sink{db: db, timeout: 5 * time.Second}
+}
+
+func (s *Sink) Write(t *telegram.Telegram) error {
+    ctx, cancel := context.WithTimeout(context.Background(), s.timeout)
+    defer cancel()
+    _, err := s.db.ExecContext(ctx, `INSERT INTO telegrams (telegram) VALUES ($1)`, t.String())
+    return err
+}
+```
+
+Register it alongside the Prometheus sink — `WithSink` is repeatable and
+sinks receive each telegram in registration order:
+
+```go
+p := telegram.NewParser(serialPort,
+    telegram.WithSink(prom.New(m)),
+    telegram.WithSink(mysink.New(db)),
+)
 ```
 
 ## License
