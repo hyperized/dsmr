@@ -65,6 +65,48 @@ The process handles `SIGINT` and `SIGTERM`. On shutdown it:
 2. Waits up to 5 s for in-flight telegrams to drain
 3. Shuts down the HTTP server with a 5 s timeout
 
+## Deployment (Raspberry Pi Zero W + DietPi)
+
+The Makefile ships cross-compile and remote-deploy targets aimed at a Pi Zero W (ARMv6) running [DietPi](https://dietpi.com/) with systemd. The bundled `dsmr.service` unit runs the binary as `/usr/local/bin/dsmr` and restarts on failure.
+
+The target host and user are parameterised — override on the command line:
+
+```sh
+make deploy DEPLOY_HOST=192.168.1.50 DEPLOY_USER=root
+```
+
+| Variable | Default | Purpose |
+|----------|---------|---------|
+| `DEPLOY_HOST` | `dsmr.local` | SSH host of the Pi |
+| `DEPLOY_USER` | `root` | SSH user |
+| `INSTALL_PATH` | `/usr/local/bin` | Where the binary lands |
+| `SYSTEMD_PATH` | `/etc/systemd/system` | Where the unit file lands |
+
+### One-time setup
+
+Cross-compile, then ship and enable the systemd unit:
+
+```sh
+make build-rpi-zero
+make install DEPLOY_HOST=<host>
+```
+
+`install` scps `dsmr.service`, runs `systemctl daemon-reload`, enables the unit, and starts it. Make sure the binary has been deployed at least once first (or run the `build-rpi-zero-deploy` target below before `install`).
+
+Add the user that runs the service to the `dialout` group so it can open the P1 serial port:
+
+```sh
+ssh <user>@<host> 'usermod -aG dialout <user>'
+```
+
+### Subsequent deploys
+
+```sh
+make build-rpi-zero-deploy DEPLOY_HOST=<host>
+```
+
+This cross-compiles, stops the service, copies the new binary to `$(INSTALL_PATH)/dsmr`, and starts the service again.
+
 ## Prometheus metrics
 
 Metrics are served at `http://<listen>/metrics` (redirected from `/`).

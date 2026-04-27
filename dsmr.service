@@ -1,0 +1,14 @@
+[Unit]
+Description=DSMR P1 Prometheus exporter
+After=network.target time-sync.target
+
+[Service]
+Type=simple
+WorkingDirectory=/usr/local/bin
+ExecStart=/usr/local/bin/dsmr
+Restart=always
+RestartSec=10
+SendSIGHUP=true
+
+[Install]
+WantedBy=multi-user.target
