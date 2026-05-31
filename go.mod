@@ -6,7 +6,7 @@ require (
 	github.com/prometheus/client_golang v1.23.2
 	github.com/shopspring/decimal v1.4.0
 	github.com/stretchr/testify v1.11.1
-	go.bug.st/serial v1.7.0
+	go.bug.st/serial v1.7.1
 )
 
 require (
