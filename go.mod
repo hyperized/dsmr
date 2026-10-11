@@ -4,7 +4,7 @@ go 1.26.0
 
 require (
 	github.com/prometheus/client_golang v1.24.1
-	github.com/shopspring/decimal v1.4.0
+	github.com/shopspring/decimal v1.5.0
 	github.com/stretchr/testify v1.12.1
 	go.bug.st/serial v1.8.0
 )
